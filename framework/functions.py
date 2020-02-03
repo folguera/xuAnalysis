@@ -134,13 +134,14 @@ class object:
 #################################################################################    
 class lepton(object):
 
-  def __init__(self, pvec = TLorentzVector(), charge = 0, pdgid = -1, mcmatch=-1, passTightID = True):
+  def __init__(self, pvec = TLorentzVector(), charge = 0, pdgid = -1, mcmatch=-1, passTightID = True, passbtag = True):
     self.SetP(pvec)
     self.SetCharge(charge)
     self.SetFlav(pdgid)
     self.resetValues()
     self.mcmatch = mcmatch
     self.passTightID = passTightID
+    self.passbtag = passbtag
   ###############################
   ### Set methods
 
@@ -258,6 +259,12 @@ def CheckZpair(lep1, lep2):
   if not lep1.charge*lep2.charge < 0: return 0
   return InvMass(lep1,lep2)
 
+def CheckSign(lep1, lep2):
+  ''' Returns: 1 if Same Sign, 0 otherwise '''
+  if not lep1.charge*lep2.charge > 0: return 0
+  return 1
+
+
 def GetNBtags(listOfJets):
   ''' Returns the number of btag jets in the list of jets '''
   nbtags = 0
@@ -344,13 +351,7 @@ def GetValue(tree, var, syst = '', index = -1):
     vart = "%s%s"%(var,syst)
     if    hasattr(tree, vars): return (getattr(tree, vars) if index == -1 else getattr(tree, vars)[index])
     elif  hasattr(tree, vart): return (getattr(tree, vart) if index == -1 else getattr(tree, vart)[index])
-    elif  hasattr(tree, var ): 
-      return (getattr(tree, var ) if index == -1 else getattr(tree, var )[index])
+    elif  hasattr(tree, var ): return (getattr(tree, var ) if index == -1 else getattr(tree, var )[index])
     else:
       print 'ERROR: var %s not in tree!!'%var
       return 0
-
-def replaceWords(string, word, newstring):
-  import re
-  return re.sub(r'\b%s\b'%word, newstring, string)
-

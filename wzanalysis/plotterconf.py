@@ -9,26 +9,33 @@ from ROOT import kRed, kOrange, kBlue, kTeal, kGreen, kGray, kAzure, kPink, kCya
 
 ### Input and output
 #path = '../temp5TeV/sep17/'
-path = '../tempWZ/'
-outpath = 'plotsWZ/'
+path = '../tempWZ7/'
+outpath = '/nfs/fanae/user/joanrs/www/5TeV/plotsWZ/'
 
 ### Definition of the processes
 processDic = {
 'WZ'  : 'WZTo3LNU',
-'VV'  : 'WWTo2L2Nu,ZZTo2L2Nu,ZZTo4L',
+'WW'  : 'WWTo2L2Nu',
+'ZZ'  : 'ZZTo2L2Nu,ZZTo4L',
 'DY'  : 'DYJetsToLL_M_10to50,DYJetsToLL_MLL50',
 'top'  : 'TT,tW_noFullHad,tbarW_noFullHad'}
 #'data': 'HighEGJet, SingleMuon'}##SingleMuon
-processes = ['VV', 'DY', 'top', 'WZ']
+processes = ['ZZ', 'WW', 'top', 'DY',  'WZ']
 
 process = processDic
 ### Definition of colors for the processes
 colors ={
-'WZ'  : kYellow-4,
-'VV'  : kGray+2,
-'DY'  : kAzure-8,
+'WZ'  : kOrange,
+'WW'  : kGray+2,
+'ZZ'  : kGreen+2,
+'DY'  : kCyan+1,
 'top' : kRed+1,
 'data': 1}
+#'WZ'  : kYellow-4,
+#'VV'  : kGray+2,
+#'DY'  : kAzure-8,
+#'top' : kRed+1,
+#'data': 1}
 
 systematics = 'MuonEff, ElecEff'#, TrigEff, Prefire, JES, JER, ISR, FSR'
 
