@@ -21,7 +21,7 @@ def GetYield(path, files, ch = 'eee', level = 'sr', histopref = '', filepref = '
   t.SetIsData(isdata)
   if var != '':
     pref = histopref + '_' if histopref != '' else ''
-    h = t.GetNamedHisto(pref + var + '_' + ch + '_' + level)
+    h = t.GetNamedHisto(pref + var + '_' + ch)
     y = h.GetYield()
   else:  
     y = t.GetYield()
@@ -49,19 +49,19 @@ for l in level.keys():
   PR.append(pr)
   for c in chan.keys():
    if pr=='WZTo3LNU':
-    WZ.append(GetYield(path, pr, chan[c], level=level[l])*Lumi)
+    WZ.append(GetYield(path, pr, chan[c], level=level[l], var = 'Yields')*Lumi)
    elif pr=='HighEGJet' or pr=='SingleMuon':
-    Da.append(GetYield(path, pr, chan[c], level=level[l]))
+    Da.append(GetYield(path, pr, chan[c], level=level[l], var = 'Yields'))
    elif pr=='DYJetsToLL_MLL50' or pr=='DYJetsToLL_M_10to50':
-    DY.append(GetYield(path, pr, chan[c], level=level[l])*Lumi)
+    DY.append(GetYield(path, pr, chan[c], level=level[l], var = 'Yields')*Lumi)
    #elif pr=='WWTo2L2Nu' or pr=='ZZTo2L2Nu' or pr=='ZZTo4L':
    # VV.append(GetYield(path, pr, chan[c], level=level[l])*Lumi)
    elif pr=='WWTo2L2Nu':
-    WW.append(GetYield(path, pr, chan[c], level=level[l])*Lumi)
+    WW.append(GetYield(path, pr, chan[c], level=level[l], var = 'Yields')*Lumi)
    elif pr=='ZZTo2L2Nu' or pr=='ZZTo4L':
-    ZZ.append(GetYield(path, pr, chan[c], level=level[l])*Lumi)
+    ZZ.append(GetYield(path, pr, chan[c], level=level[l], var = 'Yields')*Lumi)
    elif pr=='tW_noFullHad' or pr=='tbarW_noFullHad' or pr=='TT':
-    TT.append(GetYield(path, pr, chan[c], level=level[l])*Lumi)
+    TT.append(GetYield(path, pr, chan[c], level=level[l], var = 'Yields')*Lumi)
 
  print 'WZ', sum(WZ)
  print 'DY', sum(DY)
@@ -70,4 +70,4 @@ for l in level.keys():
  print 'WW', sum(WW)
  print 'VV', sum(ZZ+WW)
  #print 'Data', sum(Da)
- print 'Sig/sqrt(Sig+Back)', sum(WZ)/sqrt(sum(WZ+DY+TT+ZZ+WW))
+ #print 'Sig/sqrt(Sig+Back)', sum(WZ)/sqrt(sum(WZ+DY+TT+ZZ+WW))
