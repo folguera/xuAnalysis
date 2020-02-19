@@ -447,16 +447,16 @@ class wzanalysis(analysis):
     # elec, muon, pu, trigger...
     if not isinstance(syst, int): print '[WARNING] Label ', syst, ' is not an integer...'
     self.weight = self.EventWeight
-    if   syst == systematic.nom:       self.weight *= self.PUSF * self.prefWeight 
-    elif syst == systematic.ElecEffUp: self.weight *= self.PUSF * self.prefWeight
-    elif syst == systematic.ElecEffDo: self.weight *= self.PUSF * self.prefWeight
-    elif syst == systematic.MuonEffUp: self.weight *= self.PUSF * self.prefWeight
-    elif syst == systematic.MuonEffDo: self.weight *= self.PUSF * self.prefWeight
-    elif syst == systematic.PUUp:      self.weight *= self.PUUpSF * self.prefWeight
-    elif syst == systematic.PUDo:      self.weight *= self.PUDoSF * self.prefWeight
-    elif syst == systematic.PrefireUp: self.weight *= self.PUSF * self.prefWeightUp
-    elif syst == systematic.PrefireDo: self.weight *= self.PUSF * self.prefWeightDo
-    else: self.weight  *= self.PUSF * self.prefWeightDo
+    if   syst == systematic.nom:       self.weight *= self.PUSF * self.prefWeight #* self.SFmuon * self.SFelec
+    elif syst == systematic.ElecEffUp: self.weight *= self.PUSF * self.prefWeight #* self.SFmuon * (self.SFelec + self.SFelecErr)
+    elif syst == systematic.ElecEffDo: self.weight *= self.PUSF * self.prefWeight #* self.SFmuon * (self.SFelec - self.SFelecErr)
+    elif syst == systematic.MuonEffUp: self.weight *= self.PUSF * self.prefWeight #* (self.SFmuon + self.SFmuonErr)  * self.SFelec
+    elif syst == systematic.MuonEffDo: self.weight *= self.PUSF * self.prefWeight #* (self.SFmuon - self.SFmuonErr)  * self.SFelec
+    elif syst == systematic.PUUp:      self.weight *= self.PUUpSF * self.prefWeight #* self.SFmuon * self.SFelec
+    elif syst == systematic.PUDo:      self.weight *= self.PUDoSF * self.prefWeight #* self.SFmuon * self.SFelec
+    elif syst == systematic.PrefireUp: self.weight *= self.PUSF * self.prefWeightUp #* self.SFmuon * self.SFelec
+    elif syst == systematic.PrefireDo: self.weight *= self.PUSF * self.prefWeightDo #* self.SFmuon * self.SFelec
+    else: self.weight  *= self.PUSF * self.prefWeightDo #* self.SFmuon * self.SFelec
 
 
 

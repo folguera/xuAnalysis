@@ -9,7 +9,7 @@ from framework.functions import GetLumi
 from ROOT import TCanvas, gROOT
 gROOT.SetBatch(1)
 print
-#####Calcular el #eventos de lar egion fiducial y la total
+#####Calcular el #eventos de la region fiducial y la total
 path = '/nfs/fanae/user/joanrs/xuAnalysis/tempWZae/'
 process = 'WZTo3LNU'
 chn = ['eee','mee','emm','mmm']
