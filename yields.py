@@ -21,8 +21,8 @@ def GetYield(path, files, ch = 'eee', level = 'sr', histopref = '', filepref = '
   t.SetIsData(isdata)
   if var != '':
     pref = histopref + '_' if histopref != '' else ''
-    h = t.GetNamedHisto(pref + var + '_' + ch + '_' + level)
-    y = h.GetYield()
+    h = t.GetNamedHisto(pref + var + '_' + ch)
+    y = h.GetBinError(9)
   else:  
     y = t.GetYield()
   return y
@@ -30,7 +30,7 @@ def GetYield(path, files, ch = 'eee', level = 'sr', histopref = '', filepref = '
 from wzanalysis.wzanalysis import lev, level, ch, chan
 
 #path = '/pool/ciencias/nanoAODv4/5TeV/5TeV_21nov2019/'
-path = '/nfs/fanae/user/joanrs/xuAnalysis/tempWZ7/'
+path = '/nfs/fanae/user/joanrs/xuAnalysis/tempWZ12/'
 #process = ['WZTo3LNU_NNPDF30_TuneCP5_5p20TeV','DYJetsToLL_MLL_50_TuneCP5_5020GeV_amcatnloFXFX','DYJetsToLL_M_10to50_TuneCP5_5020GeV_amcatnloFXFX','ZZTo2L2Nu_5p02TeV','ZZTo4L_5p02TeV','WWTo2L2Nu_NNPDF31_TuneCP5_5p02TeV', 'tW_5f_noFullHad_TuneCP5_PSweights_5p02TeV_py, tW_5f_noFullHad_TuneCP5_5p02TeV', 'tbarW_5f_noFullHad_TuneCP5_PSweights_5p02TeV_powhe, tbarW_5f_noFullHad_TuneCP5_5p02TeV', 'TT_TuneCP5_PSweights_5p02TeV' ]
 t = TopHistoReader(path)
 t.SetLumi(Lumi)
@@ -40,6 +40,7 @@ process = ['WZTo3LNU','DYJetsToLL_MLL50', 'DYJetsToLL_M_10to50','ZZTo2L2Nu','ZZT
 name = ['WZ', 'DY_M50','DY_M10to50', 'ZZto2L2Nu', 'ZZto4L', 'WW', 'tW', 'tbarW', 'TT', 'HighEGJet','SingleMuon']
 chn = ['All','eee','mee','emm','mmm']
 level = {lev.lep:'lep', lev.tight : 'tight', lev.met:'met', lev.wpt:'wpt', lev.zpt:'zpt', lev.m3l:'m3l', lev.htmiss:'htmiss', lev.sr:'sr', lev.tight:'tight', lev.srtight:'srtight'}
+#level={lev.tight:'tight'}
 
 for l in level.keys():
  print 
@@ -63,7 +64,7 @@ for l in level.keys():
    elif pr=='tW_noFullHad' or pr=='tbarW_noFullHad' or pr=='TT':
     TT.append(GetYield(path, pr, chan[c], level=level[l])*Lumi)
 
- print 'WZ', sum(WZ)
+ print 'WZ', sum(WZ), WZ
  print 'DY', sum(DY)
  print 'TT', sum(TT)
  print 'ZZ', sum(ZZ)

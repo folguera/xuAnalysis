@@ -92,7 +92,7 @@ class wzanalysis(analysis):
 
     # Uncertainties
     self.doSyst = False if ('noSyst' in self.options or self.isData) else True
-    self.doJECunc = True if 'JECunc'   in self.options else False #XXX Lo hemos puesto a False para obligar a que no haga los otros que no interesan
+    self.doJECunc = False if 'JECunc'   in self.options else False #XXX Lo hemos puesto a False para obligar a que no haga los otros que no interesan
     self.jetptvar = 'Jet_pt_nom' if 'JetPtNom' in self.options else 'Jet_pt'
     self.metptvar = 'Met_pt_nom' if 'JetPtNom' in self.options else 'Met_pt'
 
@@ -163,6 +163,9 @@ class wzanalysis(analysis):
         #self.NewHisto('YieldsSS', ichan, '', isyst, 9, 0, 9)
         self.NewHisto('YieldsFid', ichan, '', isyst, 1, 0, 1)
         self.NewHisto('YieldsTot', ichan, '', isyst, 1, 0, 1)
+        self.NewHisto('YieldsLep', ichan, '', isyst, 4, 0, 4)
+        self.NewHisto('YieldsSrtight', ichan, '', isyst, 4, 0, 4)
+        self.NewHisto('YieldsTight', ichan, '', isyst, 4, 0, 4)
     ### Analysis histos
     for key_chan in chan:
       ichan = chan[key_chan]
@@ -185,8 +188,8 @@ class wzanalysis(analysis):
           self.NewHisto('NBtagNJets', ichan,ilevel,isyst, 7, -0.5, 6.5)
 
           # Leptons
-          self.NewHisto('mz',     ichan,ilevel,isyst, 60, 76, 106)
-          self.NewHisto('m3l',    ichan,ilevel,isyst, 60, 50, 350)
+          self.NewHisto('mz',     ichan,ilevel,isyst, 30, 75, 105)
+          self.NewHisto('m3l',    ichan,ilevel,isyst, 6, 50, 350)
           self.NewHisto('mtw',    ichan,ilevel,isyst, 30, 0, 150)
           self.NewHisto('LepWPt', ichan,ilevel,isyst, 24, 0, 120)
           self.NewHisto('LepWEta', ichan,ilevel,isyst, 50, -2.5, 2.5)
@@ -200,14 +203,23 @@ class wzanalysis(analysis):
           self.NewHisto('TrilepPt', ichan,ilevel,isyst, 40, 0, 200)
           self.NewHisto('ZPt', ichan,ilevel,isyst, 40, 0, 200)
           self.NewHisto('InvMass', ichan,ilevel,isyst, 60, 0, 300)
+          self.NewHisto('InvMass01', ichan,ilevel,isyst, 60, 0, 300)
+          self.NewHisto('InvMass02', ichan,ilevel,isyst, 60, 0, 300)
+          self.NewHisto('InvMass12', ichan,ilevel,isyst, 60, 0, 300)
           self.NewHisto('DYMass',  ichan,ilevel,isyst, 200, 70, 110)
           self.NewHisto('MaxDeltaPhi',  ichan,ilevel,isyst, 20, 0, 1)
           self.NewHisto('lZ0_genFlavor',  ichan,ilevel,isyst, 30, -0.5, 29.5)
           self.NewHisto('lZ1_genFlavor',  ichan,ilevel,isyst, 30, -0.5, 29.5)
           self.NewHisto('lW_genFlavor' ,  ichan,ilevel,isyst, 30, -0.5, 29.5)
-          self.NewHisto('l0', ichan,ilevel,isyst, 60, 0, 120)
-          self.NewHisto('l1', ichan,ilevel,isyst, 60, 0, 120)
-          self.NewHisto('l2', ichan,ilevel,isyst, 60, 0, 120)
+          self.NewHisto('l0Pt', ichan,ilevel,isyst, 12, 0, 120)
+          self.NewHisto('l1Pt', ichan,ilevel,isyst, 12, 0, 120)
+          self.NewHisto('l2Pt', ichan,ilevel,isyst, 12, 0, 120)
+          self.NewHisto('l0Eta', ichan,ilevel,isyst, 25, -2.5, 2.5)
+          self.NewHisto('l0Phi', ichan,ilevel,isyst, 10, -1, 1)
+          self.NewHisto('l1Eta', ichan,ilevel,isyst, 25, -2.5, 2.5)
+          self.NewHisto('l1Phi', ichan,ilevel,isyst, 10, -1, 1)
+          self.NewHisto('l2Eta', ichan,ilevel,isyst, 25, -2.5, 2.5)
+          self.NewHisto('l2Phi', ichan,ilevel,isyst, 10, -1, 1)
 
           # Jets
           self.NewHisto('Jet0Pt',   ichan,ilevel,isyst, 60, 0, 300)
@@ -232,11 +244,7 @@ class wzanalysis(analysis):
     m3l = InvMass(leptons)
 
     # Re-calculate the observables
-    lep0  = leptons[0]; lep1 = leptons[1]
-    l0pt  = lep0.Pt();  l1pt  = lep1.Pt()
-    l0eta = lep0.Eta(); l1eta = lep1.Eta()
-    l0phi = lep0.Phi(); l1phi = lep1.Phi()
-
+    lep0  = leptons[0]; lep1 = leptons[1]; lep2 = leptons[2]    
     lW  = TLorentzVector(leptons[0].p)
     lZ0 = TLorentzVector(leptons[1].p)
     lZ1 = TLorentzVector(leptons[2].p)
@@ -251,6 +259,9 @@ class wzanalysis(analysis):
     htmiss  = tript
     dphi  = DeltaPhi(lep0, lep1)
     mll   = InvMass(lep0, lep1)
+    mll01   = InvMass(lep0, lep1)
+    mll02   = InvMass(lep0, lep2)
+    mll12   = InvMass(lep2, lep1)
     dipt  = DiPt(lep0, lep1)
     
     #Then MET and JET related  
@@ -283,6 +294,9 @@ class wzanalysis(analysis):
     self.GetHisto('Btags',ich,ilev,isys).Fill(nbtag, self.weight)
     self.GetHisto('Vtx',  ich,ilev,isys).Fill(self.nvtx, self.weight)
     self.GetHisto("InvMass", ich, ilev, isys).Fill(mll, self.weight)
+    self.GetHisto("InvMass01", ich, ilev, isys).Fill(mll01, self.weight)
+    self.GetHisto("InvMass02", ich, ilev, isys).Fill(mll02, self.weight)
+    self.GetHisto("InvMass12", ich, ilev, isys).Fill(mll12, self.weight)
     self.GetHisto("mz",      ich, ilev, isys).Fill(mz, self.weight)
     self.GetHisto("mtw",     ich, ilev, isys).Fill(mtw, self.weight)
     self.GetHisto("m3l",     ich, ilev, isys).Fill(m3l, self.weight)
@@ -309,6 +323,57 @@ class wzanalysis(analysis):
     self.GetHisto('LepZ1Phi', ich,ilev,isys).Fill(lZ1phi/3.141592, self.weight)
     self.GetHisto('TrilepPt', ich,ilev,isys).Fill(tript, self.weight)
     self.GetHisto('ZPt',      ich,ilev,isys).Fill(zpt, self.weight)
+    if leptons[0].Pt()>=leptons[1].Pt() and leptons[0].Pt()>=leptons[2].Pt() and leptons[1].Pt()>=leptons[2].Pt(): 
+     lep0 = leptons[0]
+     lep1 = leptons[1]
+     lep2 = leptons[2]
+     l0pt  = lep0.Pt();  l1pt  = lep1.Pt(); l2pt  = lep2.Pt()
+     l0eta = lep0.Eta(); l1eta = lep1.Eta();  l2eta = lep2.Eta()
+     l0phi = lep0.Phi(); l1phi = lep1.Phi(); l2phi = lep2.Phi()
+    elif leptons[0].Pt()>=leptons[1].Pt() and leptons[0].Pt()>=leptons[2].Pt() and leptons[2].Pt()>=leptons[1].Pt(): 
+     lep0 = leptons[0]
+     lep1 = leptons[2]
+     lep2 = leptons[1]
+     l0pt  = lep0.Pt();  l1pt  = lep1.Pt(); l2pt  = lep2.Pt()
+     l0eta = lep0.Eta(); l1eta = lep1.Eta();  l2eta = lep2.Eta()
+     l0phi = lep0.Phi(); l1phi = lep1.Phi(); l2phi = lep2.Phi()
+    elif leptons[1].Pt()>=leptons[0].Pt() and leptons[1].Pt()>=leptons[2].Pt() and leptons[0].Pt()>=leptons[2].Pt(): 
+     lep0 = leptons[1]
+     lep1 = leptons[0]
+     lep2 = leptons[2]
+     l0pt  = lep0.Pt();  l1pt  = lep1.Pt(); l2pt  = lep2.Pt()
+     l0eta = lep0.Eta(); l1eta = lep1.Eta();  l2eta = lep2.Eta()
+     l0phi = lep0.Phi(); l1phi = lep1.Phi(); l2phi = lep2.Phi()
+    elif leptons[1].Pt()>=leptons[0].Pt() and leptons[1].Pt()>=leptons[2].Pt() and leptons[2].Pt()>=leptons[0].Pt(): 
+     lep0 = leptons[1]
+     lep1 = leptons[2]
+     lep2 = leptons[0]
+     l0pt  = lep0.Pt();  l1pt  = lep1.Pt(); l2pt  = lep2.Pt()
+     l0eta = lep0.Eta(); l1eta = lep1.Eta();  l2eta = lep2.Eta()
+     l0phi = lep0.Phi(); l1phi = lep1.Phi(); l2phi = lep2.Phi()
+    elif leptons[2].Pt()>=leptons[1].Pt() and leptons[2].Pt()>=leptons[0].Pt() and leptons[1].Pt()>=leptons[0].Pt(): 
+     lep0 = leptons[2]
+     lep1 = leptons[1]
+     lep2 = leptons[0]
+     l0pt  = lep0.Pt();  l1pt  = lep1.Pt(); l2pt  = lep2.Pt()
+     l0eta = lep0.Eta(); l1eta = lep1.Eta();  l2eta = lep2.Eta()
+     l0phi = lep0.Phi(); l1phi = lep1.Phi(); l2phi = lep2.Phi()
+    elif leptons[2].Pt()>=leptons[1].Pt() and leptons[2].Pt()>=leptons[0].Pt() and leptons[0].Pt()>=leptons[1].Pt(): 
+     lep0 = leptons[2]
+     lep1 = leptons[0]
+     lep2 = leptons[1]
+     l0pt  = lep0.Pt();  l1pt  = lep1.Pt(); l2pt  = lep2.Pt()
+     l0eta = lep0.Eta(); l1eta = lep1.Eta();  l2eta = lep2.Eta()
+     l0phi = lep0.Phi(); l1phi = lep1.Phi(); l2phi = lep2.Phi()
+    self.GetHisto('l0Pt', ich,ilev,isys).Fill(l0pt, self.weight)
+    self.GetHisto('l1Pt', ich,ilev,isys).Fill(l1pt, self.weight)
+    self.GetHisto('l2Pt', ich,ilev,isys).Fill(l2pt, self.weight)
+    self.GetHisto('l0Eta', ich,ilev,isys).Fill(l0eta, self.weight)
+    self.GetHisto('l0Phi', ich,ilev,isys).Fill(l0phi/3.141592, self.weight)
+    self.GetHisto('l1Eta', ich,ilev,isys).Fill(l1eta, self.weight)
+    self.GetHisto('l1Phi', ich,ilev,isys).Fill(l1phi/3.141592, self.weight)
+    self.GetHisto('l2Eta', ich,ilev,isys).Fill(l2eta, self.weight)
+    self.GetHisto('l2Phi', ich,ilev,isys).Fill(l2phi/3.141592, self.weight)
 
     self.GetHisto('MaxDeltaPhi',  ich,ilev,isys).Fill(maxdphi/3.141592, self.weight)
 
@@ -374,26 +439,25 @@ class wzanalysis(analysis):
      l1 = leptons[0]
      l2 = leptons[1]
     #if ich==3: print l0, l1, l2, self.weight
-    self.GetHisto('l0', ich,ilev,isyst).Fill(l0, self.weight)
-    self.GetHisto('l1', ich,ilev,isyst).Fill(l1, self.weight)
-    self.GetHisto('l2', ich,ilev,isyst).Fill(l2, self.weight)
+  
+
 
   def SetWeight(self, syst):
     ''' Sets the event weight according to the systematic variation '''
     # elec, muon, pu, trigger...
     if not isinstance(syst, int): print '[WARNING] Label ', syst, ' is not an integer...'
     self.weight = self.EventWeight
-    if   syst == systematic.nom:       self.weight *= self.PUSF * self.prefWeight * self.SFelec * self.SFmuon
-    elif syst == systematic.ElecEffUp: self.weight *= self.SFmuon * (self.SFelec + self.SFelecErr) * self.PUSF * self.prefWeight
-    elif syst == systematic.ElecEffDo: self.weight *= self.SFmuon * (self.SFelec - self.SFelecErr) * self.PUSF * self.prefWeight
-    elif syst == systematic.MuonEffUp: self.weight *= (self.SFmuon + self.SFmuonErr) * self.SFelec * self.PUSF * self.prefWeight
-    elif syst == systematic.MuonEffDo: self.weight *= (self.SFmuon - self.SFmuonErr) * self.SFelec * self.PUSF * self.prefWeight
-    elif syst == systematic.PUUp:      self.weight *= self.SFmuon * self.SFelec * self.PUUpSF * self.prefWeight
-    elif syst == systematic.PUDo:      self.weight *= self.SFmuon * self.SFelec * self.PUDoSF * self.prefWeight
-    elif syst == systematic.PrefireUp: self.weight *= self.SFmuon * self.SFelec * self.PUSF * self.prefWeightUp
-    elif syst == systematic.PrefireDo: self.weight *= self.SFmuon * self.SFelec * self.PUSF * self.prefWeightDo
-    elif syst == systematic.JESUp:       self.weight *= self.PUSF * self.prefWeight * self.SFelec * self.SFmuon
-    else:       self.weight *= self.PUSF * self.prefWeight * self.SFelec * self.SFmuon
+    if   syst == systematic.nom:       self.weight *= self.PUSF * self.prefWeight 
+    elif syst == systematic.ElecEffUp: self.weight *= self.PUSF * self.prefWeight
+    elif syst == systematic.ElecEffDo: self.weight *= self.PUSF * self.prefWeight
+    elif syst == systematic.MuonEffUp: self.weight *= self.PUSF * self.prefWeight
+    elif syst == systematic.MuonEffDo: self.weight *= self.PUSF * self.prefWeight
+    elif syst == systematic.PUUp:      self.weight *= self.PUUpSF * self.prefWeight
+    elif syst == systematic.PUDo:      self.weight *= self.PUDoSF * self.prefWeight
+    elif syst == systematic.PrefireUp: self.weight *= self.PUSF * self.prefWeightUp
+    elif syst == systematic.PrefireDo: self.weight *= self.PUSF * self.prefWeightDo
+    else: self.weight  *= self.PUSF * self.prefWeightDo
+
 
 
   def SetVariables(self, isyst):
@@ -610,6 +674,7 @@ class wzanalysis(analysis):
     #if totId != 33 and totId != 37: return
     # lW, lZ1, lZ2 assignation (same as 13 TeV)
     mz = [CheckZpair(l0,l1), CheckZpair(l0,l2), CheckZpair(l1,l2)]
+    #if mz[0]<12 or mz[1]<12 or mz[2]<12: return False
     #if max(mz) == 0: return False # +++, ---
     mzdif = [abs(x-91) for x in mz]
     minmzdif = min(mzdif)
@@ -635,7 +700,7 @@ class wzanalysis(analysis):
 
     # On Z-peak
     if abs(InvMass(zleps) - 91.) > 30.: return False
-
+    if not(InvMass(l0,l1)>12 and InvMass(l0,l2)>12 and  InvMass(l1,l2)>12): return False
     ### Trigger
     ###########################################
     trigger = {
@@ -643,9 +708,9 @@ class wzanalysis(analysis):
      #ch.mee:t.HLT_HIL3Mu20 or t.HLT_HIEle20_WPLoose_Gsf or t.HLT_HIEle20_Ele12_CaloIdL_TrackIdL_IsoVL_DZ,
      ch.mee:t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIEle20_Ele12_CaloIdL_TrackIdL_IsoVL_DZ or t.HLT_HIEle15_Ele8_CaloIdL_TrackIdL_IsoVL or t.HLT_HIEle17_WPLoose_Gsf or t.HLT_HIEle20_WPLoose_Gsf,
      #ch.emm:t.HLT_HIL3Mu20 or t.HLT_HIEle20_WPLoose_Gsf or t.HLT_HIL3DoubleMu0 or t.HLT_HIL3DoubleMu10,
-     ch.emm:t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIEle17_WPLoose_Gsf or t.HLT_HIEle20_WPLoose_Gsf or t.HLT_HIL3DoubleMu10 or t.HLT_HIL3DoubleMu0,
+     ch.emm:t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIEle17_WPLoose_Gsf or t.HLT_HIEle20_WPLoose_Gsf or t.HLT_HIL3DoubleMu10,
      #ch.mmm:t.HLT_HIL3Mu20 or t.HLT_HIL3DoubleMu0 or t.HLT_HIL3DoubleMu10,
-     ch.mmm:t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIL3DoubleMu10 or t.HLT_HIL3DoubleMu0,
+     ch.mmm:t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIL3DoubleMu10,
     }
     passTrig = trigger[ich]
 
@@ -780,7 +845,7 @@ class wzanalysis(analysis):
     self.SetWeight(systematic.nom)
     weight = self.weight
     # Better require the trigger properly 
-    #if not passTrig: return
+    if not passTrig: return
 
     #print systlabel.keys()
     # And now fill all histograms for each variation  
@@ -790,28 +855,29 @@ class wzanalysis(analysis):
       leps, jets, pmet = self.SetVariables(isyst)
       nJets = len(jets)
       nBtag = GetNBtags(jets)
+      wmt = MT(lW, pmet)
       if isyst != systematic.JESUp or isyst != systematic.JESDo or isyst != systematic.JERUp or isyst != systematic.JERDo :leps = tleps
       self.FillAll(ich, lev.lep, isyst, leps, jets, pmet)
+      self.GetHisto('YieldsLep',   ich, '', isyst).Fill(lev.lep, self.weight)
       #self.OriginLeptons(pts, ich, lev.lep, isyst) 
       if tleps[0].passTightID and tleps[1].passTightID and tleps[2].passTightID and tleps[0].passbtag and tleps[1].passbtag and tleps[2].passbtag: 
         self.FillAll(ich,lev.met,isyst,leps,jets,pmet)
-        self.OriginLeptons(pts, ich, lev.met, isyst)
+        #self.OriginLeptons(pts, ich, lev.met, isyst)
       if tleps[0].passTightID and tleps[1].passTightID and tleps[0].passbtag and tleps[1].passbtag and wpt > 20: 
         self.FillAll(ich, lev.wpt, isyst, leps, jets, pmet)
       if wpt > 20 and Z1pt > 10 and Z2pt >10: 
         self.FillAll(ich, lev.zpt, isyst, leps, jets, pmet)
-      if tleps[0].passTightID and tleps[1].passTightID and tleps[0].passbtag and tleps[1].passbtag and m3l > 100:
+      if tleps[0].passTightID and tleps[0].passbtag:
         self.FillAll(ich, lev.m3l, isyst, leps, jets, pmet)
-      if tleps[0].passTightID and tleps[1].passTightID and tleps[0].passbtag and tleps[1].passbtag and htmiss > 15:
+      if tleps[0].passTightID and tleps[0].passbtag:
         self.FillAll(ich, lev.htmiss, isyst, leps, jets, pmet)
-      if wpt > 20 and htmiss > 15 and m3l > 100:
+      if tleps[0].passTightID and tleps[1].passTightID and tleps[0].passbtag and tleps[1].passbtag:
         self.FillAll(ich, lev.sr, isyst, leps, jets, pmet)
       #     if tleps[0].passTightID and wpt > 20 and htmiss > 15 and m3l > 100:
       #    self.FillAll(ich, lev.srtight, isyst, leps, jets, pmet)
-      if tleps[0].passTightID and tleps[1].passTightID and tleps[0].passbtag and tleps[1].passbtag:
-        self.FillAll(ich, lev.srtight, isyst, leps, jets, pmet)
-      
       if tleps[0].passTightID and tleps[1].passTightID and tleps[0].passbtag and tleps[1].passbtag and m3l > 100:
+        self.FillAll(ich, lev.srtight, isyst, leps, jets, pmet)
+      if tleps[0].passTightID and tleps[1].passTightID and tleps[0].passbtag and tleps[1].passbtag and m3l > 100 and wpt > 20:
         self.FillAll(ich, lev.tight, isyst, leps, jets, pmet)
 
     return True

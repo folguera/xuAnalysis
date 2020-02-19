@@ -5,7 +5,7 @@ from ROOT import kRed, kOrange, kBlue, kTeal, kGreen, kGray, kAzure, kPink, kCya
 from ROOT import gPad, gROOT
 from ROOT.TMath import Sqrt as sqrt
 from copy import deepcopy
-from framework.fileReader import GetFiles
+from fileReader import GetFiles
 average = lambda x: sum(x)/len(x)
 gROOT.SetBatch(1)
 sys.path.append(os.path.abspath(__file__).rsplit('/xuAnalysis/',1)[0]+'/xuAnalysis/')

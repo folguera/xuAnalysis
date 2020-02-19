@@ -47,7 +47,7 @@ def GetYield(path, files, ch = 'eee', level = 'sr', inc = None, histopref = '', 
   return y
 
 from wzanalysis.wzanalysis import lev, level, ch, chan
-path = '/nfs/fanae/user/joanrs/xuAnalysis/tempWZ6/'
+path = '/nfs/fanae/user/joanrs/xuAnalysis/tempWZ11/'
 
 t = TopHistoReader(path)
 t.SetLumi(Lumi)
@@ -141,23 +141,26 @@ for l in level.keys():
   #print WZ
   Ef_WZ =sum(WZ)*nGenEvent/(sum(FR)*Lum*sigm)
   Efficiency.append(100*(Ef_All-Ef_WZ)/Ef_All)
-  Ndata=sum(Da)
+  #Ndata=sum(Back+WZ)
   Nback=sum(Back)
   if inc[i]==None:
+    Ndata = sum(Back+WZ)
     Sigma=(Ndata-Nback)/(Ef_All*A*Lum);
     SigmaLumUp=(Ndata-Nback*LumUp/Lum)/(Ef_All*A*LumUp);
     SigmaLumDo=(Ndata-Nback*LumDo/Lum)/(Ef_All*A*LumDo);
     NB=Nback
   else:
     sigma=(Ndata-Nback)/(Ef_WZ*A*Lum);
+    #print '', Sigma, sigma
     Background.append(100*(NB-Nback)/NB)
     nameinc.append(inc[i])
     Error.append((100*(Sigma-sigma)/Sigma))
 print
 for j in range(0,len(Error)):
  print nameinc[j],'=', Error[j], 'Eff=', Efficiency[j+1], 'Nback=', Background[j]
-print 'LumUp', '=', ((Sigma-SigmaLumUp)/Sigma)*100, 'Nback=', 100*(NB-NB*LumUp/Lum)/NB
-print 'LumDo', '=', ((Sigma-SigmaLumDo)/Sigma)*100, 'Nback=', 100*(NB-NB*LumDo/Lum)/NB
+print 'LumUp', '=', ((1+NB/sum(WZ))*(1-Lum/LumUp))*100, 'Nback=', 100*(NB-NB*LumUp/Lum)/NB
+print 'LumDo', '=', ((1+NB/sum(WZ))*(1-Lum/LumDo))*100, 'Nback=', 100*(NB-NB*LumDo/Lum)/NB
+
 
 def GetYield3(path, files, ch = 'eee', level = 'sr', inc = None, histopref = '', filepref = '', var = '', isdata = False):
   t = TopHistoReader(path, files)
@@ -228,12 +231,12 @@ for l in level.keys():
   Ef_WZD =sum(WZD)*nGenEvent/(sum(FR)*Lum*sigm)
   EfficiencyU.append(100*(Ef_All-Ef_WZU)/Ef_All)
   EfficiencyU.append(100*(Ef_All-Ef_WZD)/Ef_All)
-  NdataU=sum(DaU)
+  NdataU=sum(WZU+BackU)
   NbackU=sum(BackU)
-  NdataD=sum(DaD)
+  NdataD=sum(WZD+BackD)
   NbackD=sum(BackD)
-  sigmaU=(NdataU-NbackU)/(Ef_WZU*A*Lum);
-  sigmaD=(NdataD-NbackD)/(Ef_WZD*A*Lum);
+  sigmaU=(Ndata-NbackU)/(Ef_WZU*A*Lum);
+  sigmaD=(Ndata-NbackD)/(Ef_WZD*A*Lum);
   BackgroundU.append(100*(NB-NbackU)/NB)
   BackgroundU.append(100*(NB-NbackD)/NB)
   ErrorU.append((100*(Sigma-sigmaU)/Sigma))
@@ -244,7 +247,7 @@ print 'MCSigDown','=', ErrorU[1], 'Eff=', EfficiencyU[1], 'Nback=', BackgroundU[
 PR=[];TT=[]; DY=[]; VV=[]; WZ=[]; Da=[]; ZZ=[]; WW=[]; ErrorU=[]; nameinc=[]; EfficiencyU=[]; BackgroundU=[];
 for l in level.keys():
  for i in range(0,len(inc)):
-  DaU=[];BackU=[]; WZU=[]; DaD=[];BackD=[]; WZD=[];
+  DaU=[];BackU=[]; WZU=[]; DaD=[];BackD=[]; WZD=[]; DYUp=[]; DYDo=[];
   for pr in process:
    PR.append(pr)
    for c in chan.keys():
@@ -257,6 +260,8 @@ for l in level.keys():
     elif pr=='DYJetsToLL_MLL50' or pr=='DYJetsToLL_M_10to50':
      BackU.append(GetYield3(path, pr, chan[c], level=level[l], inc = inc[i], var = 'Yields')*Lumi)
      BackD.append(GetYield4(path, pr, chan[c], level=level[l], inc = inc[i], var = 'Yields')*Lumi)
+     DYUp.append(GetYield3(path, pr, chan[c], level=level[l], inc = inc[i], var = 'Yields')*Lumi)
+     DYDo.append(GetYield4(path, pr, chan[c], level=level[l], inc = inc[i], var = 'Yields')*Lumi)
     elif pr=='WWTo2L2Nu' or pr=='ZZTo2L2Nu' or pr=='ZZTo4L' or pr=='tW_noFullHad' or pr=='tbarW_noFullHad' or pr=='TT':
      BackU.append(GetYield2(path, pr, chan[c], level=level[l], inc = inc[i], var = 'Yields')*Lumi)
      BackD.append(GetYield2(path, pr, chan[c], level=level[l], inc = inc[i], var = 'Yields')*Lumi)
@@ -265,19 +270,19 @@ for l in level.keys():
   Ef_WZD =sum(WZD)*nGenEvent/(sum(FR)*Lum*sigm)
   EfficiencyU.append(100*(Ef_All-Ef_WZU)/Ef_All)
   EfficiencyU.append(100*(Ef_All-Ef_WZD)/Ef_All)
-  NdataU=sum(DaU)
+  NdataU=sum(WZU+BackU)
   NbackU=sum(BackU)
-  NdataD=sum(DaD)
+  NdataD=sum(WZD+BackD)
   NbackD=sum(BackD)
-  sigmaU=(NdataU-NbackU)/(Ef_WZU*A*Lum);
-  sigmaD=(NdataD-NbackD)/(Ef_WZD*A*Lum);
+  sigmaU=(Ndata-NbackU)/(Ef_WZU*A*Lum);
+  sigmaD=(Ndata-NbackD)/(Ef_WZD*A*Lum);
   BackgroundU.append(100*(NB-NbackU)/NB)
   BackgroundU.append(100*(NB-NbackD)/NB)
   ErrorU.append((100*(Sigma-sigmaU)/Sigma))
   ErrorU.append((100*(Sigma-sigmaD)/Sigma))
 print 'MCDYUp','=', ErrorU[0], 'Eff=', EfficiencyU[0], 'Nback=', BackgroundU[0]
 print 'MCDYDown','=', ErrorU[1], 'Eff=', EfficiencyU[1], 'Nback=', BackgroundU[1]
-
+print sum(DYUp), sum(DYDo)
 PR=[];TT=[]; DY=[]; VV=[]; WZ=[]; Da=[]; ZZ=[]; WW=[]; ErrorU=[]; nameinc=[]; EfficiencyU=[]; BackgroundU=[];
 for l in level.keys():
  for i in range(0,len(inc)):
@@ -302,12 +307,12 @@ for l in level.keys():
   Ef_WZD =sum(WZD)*nGenEvent/(sum(FR)*Lum*sigm)
   EfficiencyU.append(100*(Ef_All-Ef_WZU)/Ef_All)
   EfficiencyU.append(100*(Ef_All-Ef_WZD)/Ef_All)
-  NdataU=sum(DaU)
+  NdataU=sum(WZU+BackU)
   NbackU=sum(BackU)
-  NdataD=sum(DaD)
+  NdataD=sum(WZD+BackD)
   NbackD=sum(BackD)
-  sigmaU=(NdataU-NbackU)/(Ef_WZU*A*Lum);
-  sigmaD=(NdataD-NbackD)/(Ef_WZD*A*Lum);
+  sigmaU=(Ndata-NbackU)/(Ef_WZU*A*Lum);
+  sigmaD=(Ndata-NbackD)/(Ef_WZD*A*Lum);
   BackgroundU.append(100*(NB-NbackU)/NB)
   BackgroundU.append(100*(NB-NbackD)/NB)
   ErrorU.append((100*(Sigma-sigmaU)/Sigma))
@@ -339,12 +344,12 @@ for l in level.keys():
   Ef_WZD =sum(WZD)*nGenEvent/(sum(FR)*Lum*sigm)
   EfficiencyU.append(100*(Ef_All-Ef_WZU)/Ef_All)
   EfficiencyU.append(100*(Ef_All-Ef_WZD)/Ef_All)
-  NdataU=sum(DaU)
+  NdataU=sum(WZU+BackU)
   NbackU=sum(BackU)
-  NdataD=sum(DaD)
+  NdataD=sum(WZD+BackD)
   NbackD=sum(BackD)
-  sigmaU=(NdataU-NbackU)/(Ef_WZU*A*Lum);
-  sigmaD=(NdataD-NbackD)/(Ef_WZD*A*Lum);
+  sigmaU=(Ndata-NbackU)/(Ef_WZU*A*Lum);
+  sigmaD=(Ndata-NbackD)/(Ef_WZD*A*Lum);
   BackgroundU.append(100*(NB-NbackU)/NB)
   BackgroundU.append(100*(NB-NbackD)/NB)
   ErrorU.append((100*(Sigma-sigmaU)/Sigma))
@@ -376,12 +381,12 @@ for l in level.keys():
   Ef_WZD =sum(WZD)*nGenEvent/(sum(FR)*Lum*sigm)
   EfficiencyU.append(100*(Ef_All-Ef_WZU)/Ef_All)
   EfficiencyU.append(100*(Ef_All-Ef_WZD)/Ef_All)
-  NdataU=sum(DaU)
+  NdataU=sum(WZU+BackU)
   NbackU=sum(BackU)
-  NdataD=sum(DaD)
+  NdataD=sum(WZD+BackD)
   NbackD=sum(BackD)
-  sigmaU=(NdataU-NbackU)/(Ef_WZU*A*Lum);
-  sigmaD=(NdataD-NbackD)/(Ef_WZD*A*Lum);
+  sigmaU=(Ndata-NbackU)/(Ef_WZU*A*Lum);
+  sigmaD=(Ndata-NbackD)/(Ef_WZD*A*Lum);
   BackgroundU.append(100*(NB-NbackU)/NB)
   BackgroundU.append(100*(NB-NbackD)/NB)
   ErrorU.append((100*(Sigma-sigmaU)/Sigma))

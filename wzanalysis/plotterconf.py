@@ -9,8 +9,8 @@ from ROOT import kRed, kOrange, kBlue, kTeal, kGreen, kGray, kAzure, kPink, kCya
 
 ### Input and output
 #path = '../temp5TeV/sep17/'
-path = '../tempWZ7/'
-outpath = '/nfs/fanae/user/joanrs/www/5TeV/plotsWZ/'
+path = '../tempWZ12/'
+outpath = '/nfs/fanae/user/joanrs/www/5TeV/plotsWZ/m3l100/cuts/'
 
 ### Definition of the processes
 processDic = {
@@ -18,8 +18,8 @@ processDic = {
 'WW'  : 'WWTo2L2Nu',
 'ZZ'  : 'ZZTo2L2Nu,ZZTo4L',
 'DY'  : 'DYJetsToLL_M_10to50,DYJetsToLL_MLL50',
-'top'  : 'TT,tW_noFullHad,tbarW_noFullHad'}
-#'data': 'HighEGJet, SingleMuon'}##SingleMuon
+'top'  : 'TT,tW_noFullHad,tbarW_noFullHad',
+'data': 'HighEGJet, SingleMuon'}##SingleMuon
 processes = ['ZZ', 'WW', 'top', 'DY',  'WZ']
 
 process = processDic

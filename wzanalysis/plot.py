@@ -17,7 +17,7 @@ def Draw(name = 'Lep0Pt_eee_lep', rebin = 1, xtit = '', ytit = 'Events', doStack
   if doParallel:
     return "Draw(%s, %i, \'%s\', \'%s\', %s, \'%s\', %s, %i, %s)"%("\'" + name + "\'" if type(name) == str else "[\'"+ "\',\'".join(name) + "\']" , rebin, xtit, ytit, "True" if doStackOverflow else "False", binlabels, "True" if setLogY else "False", maxscale, "False" if not(tag) else tag)
 
-  s = Stack(outpath=outpath, doRatio = False)
+  s = Stack(outpath=outpath, doRatio = True)
   s.SetColors(colors)
   s.SetProcesses(processes)
   s.SetLumi(Lumi)
@@ -50,37 +50,50 @@ def Draw(name = 'Lep0Pt_eee_lep', rebin = 1, xtit = '', ytit = 'Events', doStack
 joblist = []
 #lev = 'met' #lep, met
 #for lev in ['lep','sr','tight', 'srtight', 'met', 'm3l','wpt','zpt','htmiss']:
-#for lev in ['lep','sr']:
-for lev in ['lep','srtight','tight']:
+for lev in ['lep']:
+#for lev in ['tight']:
+#for lev in ['lep','htmiss','sr','srtight','tight']:
   for ch in ['eee','mee','emm','mmm','All']:
  #joblist.append(Draw(GetAllCh('htmiss', lev), 1, 'H_{T}^{miss} (GeV)', 'Events / 5 GeV')
     if ch == 'All':
       joblist.append(Draw(GetAllCh('Yields', ''), 1, 'Yields', 'Events'))
       #joblist.append(Draw(GetAllCh('HT', lev), 1, 'H_{T} (GeV)', 'Events / 5 GeV'))
-      joblist.append(Draw(GetAllCh('HTmiss', lev), 1, 'H_{T}^{miss} (GeV)', 'Events / 5 GeV'))
-      joblist.append(Draw(GetAllCh('TrilepPt', lev), 2, 'p_{T}^{lll} (GeV)', 'Events / 5 GeV'))
-      joblist.append(Draw(GetAllCh('ZPt', lev), 1, 'p_{T}^{Z} (GeV)', 'Events / 5 GeV'))
-      joblist.append(Draw(GetAllCh('MET', lev), 1, 'p_{T}^{miss} (GeV)', 'Events / 5 GeV'))
-      joblist.append(Draw(GetAllCh('m3l', lev), 2, 'm_{3l} (GeV)',      'Events / 10 GeV'))
-      joblist.append(Draw(GetAllCh('mtw',lev), 1, 'm_{T}^{W} (GeV)',    'Events / 10 GeV'))
-      joblist.append(Draw(GetAllCh('mz', lev), 1, 'm_{Z} (GeV)',        'Events / 10 GeV'))
-      joblist.append(Draw(GetAllCh('LepWPt', lev), 1, 'p_{T}(lepW)  (GeV)', 'Events / 40 GeV'))
+      #joblist.append(Draw(GetAllCh('HTmiss', lev), 1, 'H_{T}^{miss} (GeV)', 'Events / 5 GeV'))
+      #joblist.append(Draw(GetAllCh('TrilepPt', lev), 2, 'p_{T}^{lll} (GeV)', 'Events / 5 GeV'))
+      #joblist.append(Draw(GetAllCh('ZPt', lev), 1, 'p_{T}^{Z} (GeV)', 'Events / 5 GeV'))
+      joblist.append(Draw(GetAllCh('MET', lev), 2, 'p_{T}^{miss} (GeV)', 'Events'))
+      joblist.append(Draw(GetAllCh('m3l', lev), 1, 'm_{3l} (GeV)',      'Events'))
+      joblist.append(Draw(GetAllCh('mtw',lev), 2, 'm_{T}^{W} (GeV)',    'Events'))
+      joblist.append(Draw(GetAllCh('mz', lev), 2, 'm_{Z} (GeV)',        'Events'))
+      joblist.append(Draw(GetAllCh('LepWPt', lev), 2, 'p_{T}(lepW)  (GeV)', 'Events'))
       #joblist.append(Draw(GetAllCh('LepWEta', lev), 1, '#eta (lepW)', 'Events'))
       #joblist.append(Draw(GetAllCh('LepWPhi', lev), 1, '#phi (lepW) (rad/#pi)', 'Events'))
-      joblist.append(Draw(GetAllCh('LepZ0Pt', lev), 1, 'p_{T}(lep0Z)  (GeV)', 'Events / 40 GeV'))
+      joblist.append(Draw(GetAllCh('LepZ0Pt', lev), 2, 'p_{T}(lep0Z)  (GeV)', 'EventsV'))
       #joblist.append(Draw(GetAllCh('LepZ0Eta', lev), 1, '#eta (lep0Z)', 'Events'))
       #joblist.append(Draw(GetAllCh('LepZ0Phi', lev), 1, '#phi (lep0Z) (rad/#pi)', 'Events'))
-      joblist.append(Draw(GetAllCh('LepZ1Pt', lev), 1, 'p_{T}(lep1Z)  (GeV)', 'Events / 40 GeV'))
+      joblist.append(Draw(GetAllCh('LepZ1Pt', lev), 2, 'p_{T}(lep1Z)  (GeV)', 'Events'))
       #joblist.append(Draw(GetAllCh('LepZ1Eta', lev), 1, '#eta (lep1Z)', 'Events'))
       #joblist.append(Draw(GetAllCh('LepZ1Phi', lev), 1, '#phi (lep1Z) (rad/#pi)', 'Events'))
       #joblist.append(Draw(GetAllCh('TrilepPt', lev), 1, 'Trilep p_{T} (GeV)', 'Events'))
       #joblist.append(Draw(GetAllCh('ZPt', lev),  1, 'Z p_{T} (GeV)', 'Events'))
       #joblist.append(Draw(GetAllCh('MaxDeltaPhi', lev), 1, 'max(#Delta#phi (ll)) (rad/#pi)', 'Events'))
-      joblist.append(Draw(GetAllCh('NJets', lev), 1, 'Jet multiplicity', 'Events', True))
-      joblist.append(Draw(GetAllCh('Btags', lev), 1, 'Jet B multiplicity', 'Events'))
+      #joblist.append(Draw(GetAllCh('InvMass01', lev), 1, 'Invariant Mass 01', 'Events', True))
+      #joblist.append(Draw(GetAllCh('InvMass02', lev), 1, 'Invariant Mass 02', 'Events', True))
+      #joblist.append(Draw(GetAllCh('InvMass12', lev), 1, 'Invariant Mass 12', 'Events', True))
+      #joblist.append(Draw(GetAllCh('NJets', lev), 1, 'Jet multiplicity', 'Events', True))
+      #joblist.append(Draw(GetAllCh('Btags', lev), 1, 'Jet B multiplicity', 'Events'))
       #joblist.append(Draw(GetAllCh('lW_genFlavor', lev), 1, 'Generator Flavor (lepW)', 'Events'))
       #joblist.append(Draw(GetAllCh('lZ0_genFlavor', lev), 1, 'Generator Flavor (lepZ0)', 'Events'))
       #joblist.append(Draw(GetAllCh('lZ1_genFlavor', lev), 1, 'Generator Flavor (lepZ1)', 'Events'))
+      #joblist.append(Draw(GetAllCh('l0Pt', lev), 1, 'p_{T}(lep0)  (GeV)', 'Events / 40 GeV'))
+      #joblist.append(Draw(GetAllCh('l1Pt', lev), 1, 'p_{T}(lep1)  (GeV)', 'Events / 40 GeV'))
+      #joblist.append(Draw(GetAllCh('l2Pt', lev), 1, 'p_{T}(lep2)  (GeV)', 'Events / 40 GeV'))
+      #joblist.append(Draw(GetAllCh('l0Eta', lev), 1, '#eta (lep0)', 'Events'))
+      #joblist.append(Draw(GetAllCh('l0Phi', lev), 1, '#phi (lep0) (rad/#pi)', 'Events'))
+      #joblist.append(Draw(GetAllCh('l1Eta', lev), 1, '#eta (lep1)', 'Events'))
+      #joblist.append(Draw(GetAllCh('l1Phi', lev), 1, '#phi (lep1) (rad/#pi)', 'Events'))
+      #joblist.append(Draw(GetAllCh('l2Eta', lev), 1, '#eta (lep2)', 'Events'))
+      #joblist.append(Draw(GetAllCh('l2Phi', lev), 1, '#phi (lep2) (rad/#pi)', 'Events'))
 
     #else:
       #joblist.append(Draw(GetName('Yields', ch, ''), 1, 'Yields', 'Events'))
@@ -89,7 +102,7 @@ for lev in ['lep','srtight','tight']:
       #joblist.append(Draw(GetName('TrilepPt', ch, lev), 1, 'p_{T}^{lll} (GeV)', 'Events / 5 GeV'))
       #joblist.append(Draw(GetName('ZPt', ch, lev), 1, 'p_{T}^{Z} (GeV)', 'Events / 5 GeV'))
       #joblist.append(Draw(GetName('MET',ch, lev), 1, 'p_{T}^{miss} (GeV)', 'Events / 5 GeV'))
-      #joblist.append(Draw(GetName('m3l',ch, lev), 10, 'm_{3l} (GeV)',      'Events / 10 GeV'))
+      #joblist.append(Draw(GetName('m3l',ch, lev), 1, 'm_{3l} (GeV)',      'Events / 10 GeV'))
       #joblist.append(Draw(GetName('mtw',ch, lev), 1, 'm_{T}^{W} (GeV)',    'Events'))
       #joblist.append(Draw(GetName('mz',ch, lev), 1, 'm_{Z} (GeV)',        'Events / 10 GeV'))
       #joblist.append(Draw(GetName('LepWPt',ch, lev), 1, 'p_{T}(lepW)  (GeV)', 'Events / 40 GeV'))
@@ -104,10 +117,15 @@ for lev in ['lep','srtight','tight']:
       #joblist.append(Draw(GetName('TrilepPt',ch, lev), 1, 'Trilep p_{T} (GeV)', 'Events'))
       #joblist.append(Draw(GetName('ZPt',ch, lev),  1, 'Z p_{T} (GeV)', 'Events'))
       #joblist.append(Draw(GetName('MaxDeltaPhi',ch, lev), 1, 'max(#Delta#phi (ll)) (rad/#pi)', 'Events'))
+      #joblist.append(Draw(GetName('Btags',ch, lev), 1, 'Jet B multiplicity', 'Events', True))
       #joblist.append(Draw(GetName('NJets',ch, lev), 1, 'Jet multiplicity', 'Events', True))
       #joblist.append(Draw(GetName('lW_genFlavor',ch, lev), 1, 'Generator Flavor (lepW)', 'Events'))
       #joblist.append(Draw(GetName('lZ0_genFlavor',ch, lev), 1, 'Generator Flavor (lepZ0)', 'Events'))
       #joblist.append(Draw(GetName('lZ1_genFlavor',ch, lev), 1, 'Generator Flavor (lepZ1)', 'Events'))
+      #joblist.append(Draw(GetName('InvMass01',ch, lev), 1, 'Invariant Mass 01', 'Events', True))
+      #joblist.append(Draw(GetName('InvMass02',ch, lev), 1, 'Invariant Mass 02', 'Events', True))
+      #joblist.append(Draw(GetName('InvMass12',ch, lev), 1, 'Invariant Mass 12', 'Events', True))
+
 
 if doParallel:
   from multiprocessing import Pool
@@ -117,8 +135,8 @@ if doParallel:
   def execute(com):
     eval(com)
 
-  with closing(Pool(8)) as p:
-    print "Now running " + str(len(joblist)) + " commands using: " + str(8) + " processes. Please wait" 
+  with closing(Pool(4)) as p:
+    print "Now running " + str(len(joblist)) + " commands using: " + str(4) + " processes. Please wait" 
     retlist1 = p.map_async(execute, joblist, 1)
     while not retlist1.ready():
       print("Plots left: {}".format(retlist1._number_left ))
