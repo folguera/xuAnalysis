@@ -8,6 +8,7 @@ from ROOT import kRed, kOrange, kBlue, kTeal, kGreen, kGray, kAzure, kPink, kCya
 from framework.functions import GetLumi
 from ROOT import TCanvas, gROOT
 gROOT.SetBatch(1)
+##### We are going to use this file to obtain the acceptance, the efficiencies and uncertainties to MC stats and experimental
 print
 #####Calcular el #eventos de la region fiducial y la total
 path = '/nfs/fanae/user/joanrs/xuAnalysis/tempWZae/'

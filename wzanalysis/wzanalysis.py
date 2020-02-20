@@ -95,6 +95,7 @@ class wzanalysis(analysis):
     self.doJECunc = False if 'JECunc'   in self.options else False #XXX Lo hemos puesto a False para obligar a que no haga los otros que no interesan
     self.jetptvar = 'Jet_pt_nom' if 'JetPtNom' in self.options else 'Jet_pt'
     self.metptvar = 'Met_pt_nom' if 'JetPtNom' in self.options else 'Met_pt'
+    self.doFiducialAndTotalRegion = True #Flag to use or not the part of the code to do the fiducial and total yields. Do only to WZ sample
 
     if self.doJECunc:
       systlabel[systematic.JESUp]   = 'JESUp'
@@ -489,101 +490,102 @@ class wzanalysis(analysis):
     if not self.isData: nGenLep = t.nGenDressedLepton 
     
     ##### Fiducial Region Leptons
-    '''Fid1=True
-    for i in range(t.nGenPart):
-      Fid0=True
-      p = TLorentzVector()
-      p.SetPtEtaPhiM(t.GenPart_pt[i], t.GenPart_eta[i], t.GenPart_phi[i], t.GenPart_mass[i])
-      if not (abs(t.GenPart_pdgId[i])==11 or abs(t.GenPart_pdgId[i])==13): Fid0=False
-      pdg=abs(t.GenPart_pdgId[i])
-      charge = 1
-      if t.GenPart_pdgId[i] > 0: charge = -1
-      if t.GenPart_status[i]!=1: Fid0=False
-      if p.Pt() < 5 or abs(p.Eta()) > 2.5: Fid0=False
-      if Fid0==True:
-       self.selFRLeptons.append(lepton(p, charge, pdg)) #######XXX
+    if self.doFiducialAndTotalRegion:
+     Fid1=True
+     for i in range(t.nGenPart):
+       Fid0=True
+       p = TLorentzVector()
+       p.SetPtEtaPhiM(t.GenPart_pt[i], t.GenPart_eta[i], t.GenPart_phi[i], t.GenPart_mass[i])
+       if not (abs(t.GenPart_pdgId[i])==11 or abs(t.GenPart_pdgId[i])==13): Fid0=False
+       pdg=abs(t.GenPart_pdgId[i])
+       charge = 1
+       if t.GenPart_pdgId[i] > 0: charge = -1
+       if t.GenPart_status[i]!=1: Fid0=False
+       if p.Pt() < 5 or abs(p.Eta()) > 2.5: Fid0=False
+       if Fid0==True:
+        self.selFRLeptons.append(lepton(p, charge, pdg)) #######XXX
 
-    nFRLep = len(self.selFRLeptons)
+     nFRLep = len(self.selFRLeptons)
 
-    FRleps = self.selFRLeptons
-    FRpts  = [lep.Pt() for lep in FRleps]
-    FRpdgs = [lep.GetPDGid() for lep in FRleps]
-    # Order leptons by pT
-    self.selFRLeptons = [lep for _,lep in sorted(zip(FRpts,FRleps))]
-    if nFRLep < 3: Fid1=False
-    if Fid1==True:
-     l0 = self.selFRLeptons[nFRLep-1]
-     l1 = self.selFRLeptons[nFRLep-2]
-     l2 = self.selFRLeptons[nFRLep-3]
-     totId = l0.GetPDGid() + l1.GetPDGid() + l2.GetPDGid()
-     ich = -1
-     if   totId == 33: ich = ch.eee
-     elif totId == 35: ich = ch.mee
-     elif totId == 37: ich = ch.emm
-     elif totId == 39: ich = ch.mmm
-     mz = [CheckZpair(l0,l1), CheckZpair(l0,l2), CheckZpair(l1,l2)]
-     mzdif = [abs(x-91) for x in mz]
-     minmzdif = min(mzdif)
-     if minmzdif == mzdif[0]:
-       lZ1 = dc(l0); lZ2 = dc(l1); lW = dc(l2)
-     elif minmzdif == mzdif[1]:
-       lZ1 = dc(l0); lZ2 = dc(l2); lW = dc(l1)
-     elif minmzdif == mzdif[2]:
-       lZ1 = dc(l1); lZ2 = dc(l2); lW = dc(l0)
-     zFRleps = [lZ1, lZ2]
-     if abs(InvMass(zFRleps) - 91.) > 30.: Fid1=False
-     FidR=FidR+1
+     FRleps = self.selFRLeptons
+     FRpts  = [lep.Pt() for lep in FRleps]
+     FRpdgs = [lep.GetPDGid() for lep in FRleps]
+     # Order leptons by pT
+     self.selFRLeptons = [lep for _,lep in sorted(zip(FRpts,FRleps))]
+     if nFRLep < 3: Fid1=False
      if Fid1==True:
-      self.GetHisto('YieldsFid', ich).Fill(FidR, 1)
+      l0 = self.selFRLeptons[nFRLep-1]
+      l1 = self.selFRLeptons[nFRLep-2]
+      l2 = self.selFRLeptons[nFRLep-3]
+      totId = l0.GetPDGid() + l1.GetPDGid() + l2.GetPDGid()
+      ich = -1
+      if   totId == 33: ich = ch.eee
+      elif totId == 35: ich = ch.mee
+      elif totId == 37: ich = ch.emm
+      elif totId == 39: ich = ch.mmm
+      mz = [CheckZpair(l0,l1), CheckZpair(l0,l2), CheckZpair(l1,l2)]
+      mzdif = [abs(x-91) for x in mz]
+      minmzdif = min(mzdif)
+      if minmzdif == mzdif[0]:
+        lZ1 = dc(l0); lZ2 = dc(l1); lW = dc(l2)
+      elif minmzdif == mzdif[1]:
+        lZ1 = dc(l0); lZ2 = dc(l2); lW = dc(l1)
+      elif minmzdif == mzdif[2]:
+        lZ1 = dc(l1); lZ2 = dc(l2); lW = dc(l0)
+      zFRleps = [lZ1, lZ2]
+      if abs(InvMass(zFRleps) - 91.) > 30.: Fid1=False
+      FidR=FidR+1
+      if Fid1==True:
+       self.GetHisto('YieldsFid', ich).Fill(FidR, 1)
 
 
-    #### Total Region Leptons
-    Tot1=True
-    for i in range(t.nGenPart):
-      Tot0=True
-      p = TLorentzVector()
-      p.SetPtEtaPhiM(t.GenPart_pt[i], t.GenPart_eta[i], t.GenPart_phi[i], t.GenPart_mass[i])
-      if not (abs(t.GenPart_pdgId[i])==11 or abs(t.GenPart_pdgId[i])==13): Tot0=False
-      pdg=abs(t.GenPart_pdgId[i])
-      charge = 1
-      if t.GenPart_pdgId[i] > 0: charge = -1
-      if t.GenPart_status[i]!=1: Tot0=False
-      if Tot0==True:
-       self.selTRLeptons.append(lepton(p, charge, pdg)) #######XXX
+     #### Total Region Leptons
+     Tot1=True
+     for i in range(t.nGenPart):
+       Tot0=True
+       p = TLorentzVector()
+       p.SetPtEtaPhiM(t.GenPart_pt[i], t.GenPart_eta[i], t.GenPart_phi[i], t.GenPart_mass[i])
+       if not (abs(t.GenPart_pdgId[i])==11 or abs(t.GenPart_pdgId[i])==13): Tot0=False
+       pdg=abs(t.GenPart_pdgId[i])
+       charge = 1
+       if t.GenPart_pdgId[i] > 0: charge = -1
+       if t.GenPart_status[i]!=1: Tot0=False
+       if Tot0==True:
+        self.selTRLeptons.append(lepton(p, charge, pdg)) #######XXX
 
-    nTRLep = len(self.selTRLeptons)
+     nTRLep = len(self.selTRLeptons)
 
-    TRleps = self.selTRLeptons
-    TRpts  = [lep.Pt() for lep in TRleps]
-    TRpdgs = [lep.GetPDGid() for lep in TRleps]
-    # Order leptons by pT
-    self.selTRLeptons = [lep for _,lep in sorted(zip(TRpts,TRleps))]
-    if nTRLep < 3: Tot1=False
+     TRleps = self.selTRLeptons
+     TRpts  = [lep.Pt() for lep in TRleps]
+     TRpdgs = [lep.GetPDGid() for lep in TRleps]
+     # Order leptons by pT
+     self.selTRLeptons = [lep for _,lep in sorted(zip(TRpts,TRleps))]
+     if nTRLep < 3: Tot1=False
 
-    if Tot1==True:
-     l0 = self.selTRLeptons[nTRLep-1]
-     l1 = self.selTRLeptons[nTRLep-2]
-     l2 = self.selTRLeptons[nTRLep-3]
-     totId = l0.GetPDGid() + l1.GetPDGid() + l2.GetPDGid()
-     ich = -1
-     if   totId == 33: ich = ch.eee
-     elif totId == 35: ich = ch.mee
-     elif totId == 37: ich = ch.emm
-     elif totId == 39: ich = ch.mmm
-     mz = [CheckZpair(l0,l1), CheckZpair(l0,l2), CheckZpair(l1,l2)]
-     mzdif = [abs(x-91) for x in mz]
-     minmzdif = min(mzdif)
-     if minmzdif == mzdif[0]:
-       lZ1 = dc(l0); lZ2 = dc(l1); lW = dc(l2)
-     elif minmzdif == mzdif[1]:
-       lZ1 = dc(l0); lZ2 = dc(l2); lW = dc(l1)
-     elif minmzdif == mzdif[2]:
-       lZ1 = dc(l1); lZ2 = dc(l2); lW = dc(l0)
-     zTRleps = [lZ1, lZ2]
-     if abs(InvMass(zTRleps) - 91.) > 30.: Tot1=False
-     TotR=TotR+1
      if Tot1==True:
-      self.GetHisto('YieldsTot', ich).Fill(TotR, 1) '''
+      l0 = self.selTRLeptons[nTRLep-1]
+      l1 = self.selTRLeptons[nTRLep-2]
+      l2 = self.selTRLeptons[nTRLep-3]
+      totId = l0.GetPDGid() + l1.GetPDGid() + l2.GetPDGid()
+      ich = -1
+      if   totId == 33: ich = ch.eee
+      elif totId == 35: ich = ch.mee
+      elif totId == 37: ich = ch.emm
+      elif totId == 39: ich = ch.mmm
+      mz = [CheckZpair(l0,l1), CheckZpair(l0,l2), CheckZpair(l1,l2)]
+      mzdif = [abs(x-91) for x in mz]
+      minmzdif = min(mzdif)
+      if minmzdif == mzdif[0]:
+        lZ1 = dc(l0); lZ2 = dc(l1); lW = dc(l2)
+      elif minmzdif == mzdif[1]:
+        lZ1 = dc(l0); lZ2 = dc(l2); lW = dc(l1)
+      elif minmzdif == mzdif[2]:
+        lZ1 = dc(l1); lZ2 = dc(l2); lW = dc(l0)
+      zTRleps = [lZ1, lZ2]
+      if abs(InvMass(zTRleps) - 91.) > 30.: Tot1=False
+      TotR=TotR+1
+      if Tot1==True:
+       self.GetHisto('YieldsTot', ich).Fill(TotR, 1)
 
 
   
