@@ -30,7 +30,7 @@ def GetYield(path, files, ch = 'eee', level = 'sr', histopref = '', filepref = '
 from wzanalysis.wzanalysis import lev, level, ch, chan
 
 #path = '/pool/ciencias/nanoAODv4/5TeV/5TeV_21nov2019/'
-path = '/nfs/fanae/user/joanrs/xuAnalysis/tempWZ12/'
+path = '/nfs/fanae/user/folgueras/SMP/5TeV/xuAnalysis/tempWZ12/'
 #process = ['WZTo3LNU_NNPDF30_TuneCP5_5p20TeV','DYJetsToLL_MLL_50_TuneCP5_5020GeV_amcatnloFXFX','DYJetsToLL_M_10to50_TuneCP5_5020GeV_amcatnloFXFX','ZZTo2L2Nu_5p02TeV','ZZTo4L_5p02TeV','WWTo2L2Nu_NNPDF31_TuneCP5_5p02TeV', 'tW_5f_noFullHad_TuneCP5_PSweights_5p02TeV_py, tW_5f_noFullHad_TuneCP5_5p02TeV', 'tbarW_5f_noFullHad_TuneCP5_PSweights_5p02TeV_powhe, tbarW_5f_noFullHad_TuneCP5_5p02TeV', 'TT_TuneCP5_PSweights_5p02TeV' ]
 t = TopHistoReader(path)
 t.SetLumi(Lumi)
@@ -39,7 +39,8 @@ PR=[];TT=[]; DY=[]; VV=[]; WZ=[]; Da=[]; ZZ=[]; WW=[];
 process = ['WZTo3LNU','DYJetsToLL_MLL50', 'DYJetsToLL_M_10to50','ZZTo2L2Nu','ZZTo4L','WWTo2L2Nu','tW_noFullHad','tbarW_noFullHad','TT', 'HighEGJet','SingleMuon']
 name = ['WZ', 'DY_M50','DY_M10to50', 'ZZto2L2Nu', 'ZZto4L', 'WW', 'tW', 'tbarW', 'TT', 'HighEGJet','SingleMuon']
 chn = ['All','eee','mee','emm','mmm']
-level = {lev.lep:'lep', lev.tight : 'tight', lev.met:'met', lev.wpt:'wpt', lev.zpt:'zpt', lev.m3l:'m3l', lev.htmiss:'htmiss', lev.sr:'sr', lev.tight:'tight', lev.srtight:'srtight'}
+level = {lev.BR3l:'BR3L', lev.lepWt:'lepWtight', lev.SSt:'SStight', lev.m3l:'m3l', lev.SR3l:'SR3l', lev.SR3l_LT:'SR3l_LT', lev.CR3l:'CR3l', lev.SS2l_LL:'SS2l_LL', lev.SS2l:'SS2l', lev.SR2l:'SR2l'}
+#level = {lev.lep:'lep', lev.tight : 'tight', lev.met:'met', lev.wpt:'wpt', lev.zpt:'zpt', lev.m3l:'m3l', lev.htmiss:'htmiss', lev.sr:'sr', lev.tight:'tight', lev.srtight:'srtight'}
 #level={lev.tight:'tight'}
 
 for l in level.keys():

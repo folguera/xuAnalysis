@@ -304,7 +304,8 @@ class analysis:
   def craftJob(self, n0, nF, index = -1):
     ''' Returns a string with all the info for creating a job '''
     localPath  = os.getcwd() + '/'
-    modulname  = self.__class__.__name__
+    modulname  = self.__class__.__name__ 
+    modulfld   = modulname if (self.modulefolder=='') else self.modulefolder
     path       = self.inpath
     filename   = self.fileName
     outpath    = self.outpath
@@ -317,7 +318,7 @@ class analysis:
     elif os.path.isfile('/opt/root6/bin/thisroot.sh'):
       t += 'source /cms/slc6_amd64_gcc530/external/gcc/5.3.0/etc/profile.d/init.sh; source /cms/slc6_amd64_gcc530/external/python/2.7.11-giojec2/etc/profile.d/init.sh; source /cms/slc6_amd64_gcc530/external/python/2.7.11-giojec2/etc/profile.d/dependencies-setup.sh; source /cms/slc6_amd64_gcc530/external/cmake/3.5.2/etc/profile.d/init.sh;source /opt/root6/bin/thisroot.sh\n'
     pycom =  'python -c \''
-    pycom += 'from ' + modulname + '.' + modulname + ' import *; '
+    pycom += 'from ' + modulfld + '.' + modulname + ' import *; '
     if isinstance(filename, list):
       fname = filename [0]
       for f in filename[1:]: fname += ', %s'%f
@@ -495,7 +496,7 @@ class analysis:
   #############################################################################################
   ### Init method
 
-  def __init__(self,fname, fileName = '', xsec = 1, outpath = './temp/', nSlots = 1, eventRange = [], run = False, sendJobs = False, verbose = 1, index = -1, options = '', chooseFile = -1, treeName = 'Events',outname = '', elistf=""):
+  def __init__(self,fname, fileName = '', xsec = 1, outpath = './temp/', nSlots = 1, eventRange = [], run = False, sendJobs = False, verbose = 1, index = -1, options = '', chooseFile = -1, treeName = 'Events',outname = '', elistf="", modulefolder = ''):
     # Default values:
     self.inpath = fname
     self.out = ''
@@ -537,4 +538,4 @@ class analysis:
     if run: self.run(self.firstEvent, self.firstEvent+self.nRunEvents)
     elif sendJobs: self.sendJobs()
     
-
+    self.modulefolder = modulefolder
