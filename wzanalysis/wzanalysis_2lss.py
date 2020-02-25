@@ -258,7 +258,8 @@ class wzanalysis_2lss(analysis):
     self.GetHisto('NJets',ich,ilev,isys).Fill(njet, self.weight)
     self.GetHisto('Btags',ich,ilev,isys).Fill(nbtag, self.weight)
     self.GetHisto('Channel',ich,ilev,isys).Fill(ich, self.weight)
-
+    self.GetHisto('mtW',ich,ilev,isys).Fill(mtw, self.weight)
+    
     self.GetHisto('Vtx',  ich,ilev,isys).Fill(self.nvtx, self.weight)
     self.GetHisto("InvMass", ich, ilev, isys).Fill(mll, self.weight)
     self.GetHisto("lZ_genFlavor",     ich, ilev, isys).Fill(ord(leptons[1].mcmatch), self.weight)
@@ -549,6 +550,7 @@ class wzanalysis_2lss(analysis):
       if not(t.Electron_mvaFall17V2Iso_WPL[i]): continue
       if not(t.Electron_miniPFRelIso_all[i] < 0.4): continue
       if not(t.Electron_convVeto[i]): continue
+      if not(t.Electron_tightCharge[i]>=2): continue;
 
       # Tight (analysis) ID is leptonMVA + tighter miniIso
       if not(t.Electron_sip3d[i] < 8): passTightID = False
@@ -680,14 +682,14 @@ class wzanalysis_2lss(analysis):
     ### And look for OSSF and classify the channel
     l0 = self.selLeptons[0]
     l1 = self.selLeptons[1]
-    totId = l0.GetPDGid() + l1.GetPDGid()
+    totId  =l0.GetPDGid() + l1.GetPDGid()
     ich = -1
     if   totId == 22: 
       ich = ch.ee
       if not (pts[0]>=17 and pts[1]>=10): return False
     elif totId == 24: 
       ich = ch.em
-      if not (pts[0]>=20 and pts[1]>=20): return False
+      if not (pts[0]>=20 and  pts[1]>=15): return False
     elif totId == 26: 
       ich = ch.mm
       if not (pts[0]>=12 and pts[1]>=10): return False
@@ -700,9 +702,9 @@ class wzanalysis_2lss(analysis):
     ### Trigger
     ###########################################
     trigger = {
-      ch.mm: (t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIL3DoubleMu10),
-      ch.em: (t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIEle17_WPLoose_Gsf or t.HLT_HIEle20_WPLoose_Gsf),
       ch.ee: (t.HLT_HIEle20_WPLoose_Gsf or t.HLT_HIEle17_WPLoose_Gsf or t.HLT_HIEle20_Ele12_CaloIdL_TrackIdL_IsoVL_DZ or t.HLT_HIEle15_Ele8_CaloIdL_TrackIdL_IsoVL),
+      ch.em: (t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIEle17_WPLoose_Gsf or t.HLT_HIEle20_WPLoose_Gsf),
+      ch.mm: (t.HLT_HIL3Mu20 or t.HLT_HIL3Mu12 or t.HLT_HIL3DoubleMu10),
     }
 
     passTrig = trigger[ich]
@@ -711,11 +713,11 @@ class wzanalysis_2lss(analysis):
     if self.isData:
       if   self.sampleDataset == datasets.SingleElec:
         if   ich == ch.ee:  passTrig = trigger[ch.ee] 
-        elif ich == ch.em:  passTrig = trigger[ch.ee] and not trigger[ch.mm]       
+        elif ich == ch.em:  passTrig = trigger[ch.em] and not trigger[ch.mm]       
         else:               passTrig = False
       elif self.sampleDataset == datasets.SingleMuon:
         if   ich == ch.mm:  passTrig = trigger[ch.mm] 
-        elif ich == ch.em:  passTrig = trigger[ch.mm] and not trigger[ch.ee]       
+        elif ich == ch.em:  passTrig = trigger[ch.em] 
         else:               passTrig = False
     
     ### Event selection

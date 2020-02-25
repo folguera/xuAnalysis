@@ -10,7 +10,7 @@ gROOT.SetBatch(1)
 
 ######################################################################################
 ### Plots
-hm = HistoManager(processes_2lss, systematics, '', path=path_2lss, processDic=processDic, lumi = Lumi)
+hm = HistoManager(processes_2lss, systematics, '', path=path_2lss, processDic=processDic_2lss, lumi = Lumi)
 doParallel = True
 
 ## create outputfolder first: 
@@ -57,7 +57,7 @@ def Draw(name = 'Lep0Pt_eee_lep', rebin = 1, xtit = '', ytit = 'Events', doStack
 
 joblist = []
 
-for lev in ['SS2l_LL','SS2l','SR2l']:
+for lev in ['SS2l','SR2l','SR2l_LT']:
   for ch in ['em','ee','mm','2l']:
     if ch == '2l':
       joblist.append(Draw(GetAllCh2l('Yields', ''), 1, 'Yields', 'Events'))

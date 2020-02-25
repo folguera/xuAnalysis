@@ -10,12 +10,12 @@ from ROOT.TMath import Sqrt as sqrt
 from ROOT import kRed, kOrange, kBlue, kTeal, kGreen, kGray, kAzure, kPink, kCyan, kBlack, kSpring, kViolet, kYellow
 
 ### Input and output
-path_3l   = '/nfs/fanae/user/folgueras/SMP/5TeV/xuAnalysis/Feb20_WZ_3L_noSyst/'
-path_2lss = '/nfs/fanae/user/folgueras/SMP/5TeV/xuAnalysis/Feb20_WZ_2LSS_noSyst/'
+path_3l   = '/nfs/fanae/user/folgueras/SMP/5TeV/xuAnalysis/Feb24_WZ_3L_noSyst/'
+path_2lss = '/nfs/fanae/user/folgueras/SMP/5TeV/xuAnalysis/Feb24_WZ_2LSS_noSyst_wTrig/'
 
 outpath    = '/nfs/fanae/user/folgueras/www/5TeV/plotsWZ/Feb24/'
 outpath_3l = '/nfs/fanae/user/folgueras/www/5TeV/plotsWZ/Feb24/3L/'
-outpath_2lss = '/nfs/fanae/user/folgueras/www/5TeV/plotsWZ/Feb24/2LSS/'
+outpath_2lss = '/nfs/fanae/user/folgueras/www/5TeV/plotsWZ/Feb24/2LSS/JetBinnedW/'
 
 ### Definition of the processes
 processDic_2lss = {
@@ -23,10 +23,10 @@ processDic_2lss = {
 'WW'  : 'WWTo2L2Nu',
 'ZZ'  : 'ZZTo2L2Nu,ZZTo4L',
 'DY'  : 'DYJetsToLL_M_10to50,DYJetsToLL_MLL50',
-'top'  : 'TT,tW_noFullHad,tbarW_noFullHad',
-'W'    : 'WJets',
+'top'   : 'TT,tW_noFullHad,tbarW_noFullHad',
+'WJets' : 'W0JetsToLNu,W1JetsToLNu,W2JetsToLNu,W3JetsToLNu',
 'data': 'HighEGJet, SingleMuon'}
-processes_2lss = ['ZZ', 'WW', 'top', 'DY',  'WZ', 'W']
+processes_2lss = ['ZZ', 'WW', 'top', 'DY',  'WZ', 'WJets']
 
 processDic_3l = {
 'WZ'  : 'WZTo3LNU',
@@ -47,7 +47,7 @@ colors ={
 'ZZ'  : kGreen+2,
 'DY'  : kCyan+1,
 'top' : kRed+1,
-'W'   : kAzure-8,
+'WJets'   : kAzure-8,
 'data': 1}
 
 systematics = '' #'MuonEff, ElecEff'#, TrigEff, Prefire, JES, JER, ISR, FSR'
