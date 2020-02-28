@@ -1,5 +1,7 @@
+
 import os, sys
 basepath = os.path.abspath(__file__).rsplit('/xuAnalysis/',1)[0]+'/xuAnalysis/'
+print basepath
 sys.path.append(basepath)
 from framework.functions import GetLumi
 from plotter.TopHistoReader import TopHistoReader, HistoManager
@@ -8,29 +10,47 @@ from ROOT.TMath import Sqrt as sqrt
 from ROOT import kRed, kOrange, kBlue, kTeal, kGreen, kGray, kAzure, kPink, kCyan, kBlack, kSpring, kViolet, kYellow
 
 ### Input and output
-#path = '../temp5TeV/sep17/'
-path = '../tempWZ/'
-outpath = 'plotsWZ/'
+path_3l   = '/nfs/fanae/user/folgueras/SMP/5TeV/xuAnalysis/Feb24_WZ_3L_noSyst/'
+path_2lss = '/nfs/fanae/user/folgueras/SMP/5TeV/xuAnalysis/Feb24_WZ_2LSS_noSyst_wTrig/'
+
+outpath    = '/nfs/fanae/user/folgueras/www/5TeV/plotsWZ/Feb24/'
+outpath_3l = '/nfs/fanae/user/folgueras/www/5TeV/plotsWZ/Feb24/3L/'
+outpath_2lss = '/nfs/fanae/user/folgueras/www/5TeV/plotsWZ/Feb24/2LSS/JetBinnedW/'
 
 ### Definition of the processes
-processDic = {
+processDic_2lss = {
 'WZ'  : 'WZTo3LNU',
-'VV'  : 'WWTo2L2Nu,ZZTo2L2Nu,ZZTo4L',
+'WW'  : 'WWTo2L2Nu',
+'ZZ'  : 'ZZTo2L2Nu,ZZTo4L',
 'DY'  : 'DYJetsToLL_M_10to50,DYJetsToLL_MLL50',
-'top'  : 'TT,tW_noFullHad,tbarW_noFullHad'}
-#'data': 'HighEGJet, SingleMuon'}##SingleMuon
-processes = ['VV', 'DY', 'top', 'WZ']
+'top'   : 'TT,tW_noFullHad,tbarW_noFullHad',
+'WJets' : 'W0JetsToLNu,W1JetsToLNu,W2JetsToLNu,W3JetsToLNu',
+'data': 'HighEGJet, SingleMuon'}
+processes_2lss = ['ZZ', 'WW', 'top', 'DY',  'WZ', 'WJets']
 
-process = processDic
+processDic_3l = {
+'WZ'  : 'WZTo3LNU',
+'WW'  : 'WWTo2L2Nu',
+'ZZ'  : 'ZZTo2L2Nu,ZZTo4L',
+'DY'  : 'DYJetsToLL_M_10to50,DYJetsToLL_MLL50',
+'top'  : 'TT,tW_noFullHad,tbarW_noFullHad',
+'data': 'HighEGJet, SingleMuon'}
+processes_3l   = ['ZZ', 'WW', 'top', 'DY',  'WZ']
+
+
+#process = processDic
+
 ### Definition of colors for the processes
 colors ={
-'WZ'  : kYellow-4,
-'VV'  : kGray+2,
-'DY'  : kAzure-8,
+'WZ'  : kOrange,
+'WW'  : kGray+2,
+'ZZ'  : kGreen+2,
+'DY'  : kCyan+1,
 'top' : kRed+1,
+'WJets'   : kAzure-8,
 'data': 1}
 
-systematics = 'MuonEff, ElecEff'#, TrigEff, Prefire, JES, JER, ISR, FSR'
+systematics = '' #'MuonEff, ElecEff'#, TrigEff, Prefire, JES, JER, ISR, FSR'
 
 Lumi = 296.1 #294.24 #296.1
 
@@ -39,4 +59,10 @@ def GetName(var, chan, lev):
 
 def GetAllCh(var, lev):
   return [GetName(var,'eee',lev), GetName(var,'emm',lev), GetName(var,'mee',lev), GetName(var,'mmm',lev)]
+
+def GetAllCh3l(var, lev):
+  return [GetName(var,'eee',lev), GetName(var,'emm',lev), GetName(var,'mee',lev), GetName(var,'mmm',lev)]
+
+def GetAllCh2l(var, lev):
+  return [GetName(var,'ee',lev), GetName(var,'em',lev), GetName(var,'mm',lev)]
 

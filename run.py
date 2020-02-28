@@ -102,7 +102,7 @@ def GetTStringVectorSamples(path, samples):
   v = GetTStringVector(samples)
 
 
-def RunSample(selection, path, sample, year = 2018, xsec = 1, nSlots = 1, outname = '', outpath = '', options = '', nEvents = 0, FirstEvent = 0, prefix = 'Tree', verbose = 0, pretend = False, dotest = False, sendJobs = False, queue = 'batch', treeName = 'Events', elistf=""):
+def RunSample(selection, modulefolder, path, sample, year = 2018, xsec = 1, nSlots = 1, outname = '', outpath = '', options = '', nEvents = 0, FirstEvent = 0, prefix = 'Tree', verbose = 0, pretend = False, dotest = False, sendJobs = False, queue = 'batch', treeName = 'Events', elistf=""):
 
   if dotest:
     nEvents  = 1000
@@ -110,7 +110,9 @@ def RunSample(selection, path, sample, year = 2018, xsec = 1, nSlots = 1, outnam
     sendJobs = False
   if isinstance(sample, str) and ',' in sample: sample = sample.replace(' ','').split(',')
   sap = sample if not isinstance(sample, list) else sample[0]
+  print sample
   gs = filter(lambda x : os.path.isfile(x), [path + sap + '_0.root', path + 'Tree_' + sap + '_0.root', path + sap + '.root'])
+  print gs
   if len(gs) == 0: print 'ERROR: file %s not found in %s'%(sap, path)
   isData = GuessIsData(gs[0])
   
@@ -119,7 +121,11 @@ def RunSample(selection, path, sample, year = 2018, xsec = 1, nSlots = 1, outnam
   try:
     selecModul = __import__('%s.%s'%(selection,selection))
   except:
-    selecModul = __import__('%s'%selection)
+      try: 
+          selecModul = __import__('%s.%s'%(modulefolder,selection))
+      except:
+          selecModul = __import__('%s'%selection)
+
   try:
     modul = getattr(selecModul, selection)
     analysis = getattr(modul, selection)
@@ -130,7 +136,7 @@ def RunSample(selection, path, sample, year = 2018, xsec = 1, nSlots = 1, outnam
   sname = samples[0].split('/')[-1]
   options = GetOptions(path, sname, options)
   if nEvents != 0: evRang = [FirstEvent, nEvents]
-  an = analysis(path, sample, eventRange = evRang, xsec = xsec, nSlots = nSlots, options = options, verbose=verbose, treeName = treeName, elistf=elistf)
+  an = analysis(path, sample, eventRange = evRang, xsec = xsec, nSlots = nSlots, options = options, verbose=verbose, treeName = treeName, elistf=elistf,modulefolder=modulefolder)
   an.SetOutDir(outpath)
   an.SetOutName(outname)
 
@@ -237,7 +243,7 @@ def main(ocfgfile = ''):
         #if   l == 'verbose': verbose = 1
         if   l == 'pretend': pretend = 1
         elif l == 'test'   : dotest  = 1
-        elif l in ['path', 'sample', 'options', 'selection', 'xsec', 'prefix', 'outpath', 'year', 'nSlots', 'nEvents', 'firstEvent', 'queue']: continue
+        elif l in ['path', 'sample', 'options', 'selection', 'xsec', 'prefix', 'outpath', 'year', 'nSlots', 'nEvents', 'firstEvent', 'queue', 'modulefolder']: continue
         else:
           spl.append(l)
           samplefiles[l]=l
@@ -263,6 +269,7 @@ def main(ocfgfile = ''):
         elif key == 'sample'    : sample    = val
         elif key == 'options'   : options   = val
         elif key == 'selection' : selection = val
+        elif key == 'modulefolder' : modulefolder = val
         elif key == 'xsec'      : xsec      = val
         elif key == 'prefix'    : prefix    = val
         elif key == 'outpath'   : outpath   = val
@@ -322,10 +329,10 @@ def main(ocfgfile = ''):
       sample  = samplefiles[sname]
       elistf  = elistfiles[sname]
       ncores  = nslots[sname]
-      out[outname] = RunSample(selection, path, sample, year, xsec, ncores, outname, outpath, options, nEvents, FirstEvent, prefix, verbose, pretend, dotest, sendJobs, queue, treeName, elistf)
+      out[outname] = RunSample(selection, modulefolder, path, sample, year, xsec, ncores, outname, outpath, options, nEvents, FirstEvent, prefix, verbose, pretend, dotest, sendJobs, queue, treeName, elistf)
   
   else: # no config file...
-    out[outname] = RunSample(selection, path, sample, year, xsec, nSlots, outname, outpath, options, nEvents, FirstEvent, prefix, verbose, pretend, dotest, sendJobs, queue, treeName)
+    out[outname] = RunSample(selection, modulefolder, path, sample, year, xsec, nSlots, outname, outpath, options, nEvents, FirstEvent, prefix, verbose, pretend, dotest, sendJobs, queue, treeName)
   return out
 
 if __name__ == '__main__':
