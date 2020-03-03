@@ -25,14 +25,21 @@ chan = {ch.ElMu:'ElMu', ch.MuMu:'MuMu', ch.ElEl:'ElEl'}
 
 ### Levels to ints
 class lev():
-  dilepton = 0
-  ZVeto    = 1
-  MET      = 2
-  jets2    = 3
-  btag1    = 4
-  ww       = 5
-level = {lev.dilepton:'dilepton', lev.ZVeto:'ZVeto', lev.MET:'MET', lev.jets2:'2jets', lev.btag1:'1btag', lev.ww:'ww'}
-invlevel = {'dilepton':lev.dilepton, 'ZVeto':lev.ZVeto, 'MET':lev.MET, '2jets':lev.jets2, '1btag':lev.btag1, 'ww':lev.ww}
+  dilepton_LL = 0
+  ZVeto_LL    = 1
+  MET_LL      = 2
+  jets2_LL    = 3
+  btag1_LL    = 4
+  ww_LL       = 5
+  dilepton = 6
+  ZVeto    = 7
+  MET      = 8
+  jets2    = 9
+  btag1    = 10
+  ww       = 11
+  
+level = {lev.dilepton_LL:'dilepton_LL', lev.ZVeto_LL:'ZVeto_LL', lev.MET_LL:'MET_LL', lev.jets2_LL:'2jets_LL', lev.btag1_LL:'1btag_LL', lev.ww_LL:'ww_LL',lev.dilepton:'dilepton', lev.ZVeto:'ZVeto', lev.MET:'MET', lev.jets2:'2jets', lev.btag1:'1btag', lev.ww:'ww'}
+#invlevel = {'dilepton':lev.dilepton, 'ZVeto':lev.ZVeto, 'MET':lev.MET, '2jets':lev.jets2, '1btag':lev.btag1, 'ww':lev.ww}
 
 ### Systematic uncertainties
 class systematic():
@@ -449,12 +456,6 @@ class tt5TeV(analysis):
       #self.GetHisto('Jet1Csv',   ich,ilev,isys).Fill(j1csv, self.weight)
       self.GetHisto('Jet1DCsv',   ich,ilev,isys).Fill(j1deepcsv, self.weight)
 
-    #for ijet in jets:
-    #  self.GetHisto('JetAllPt', ich,ilev,isys).Fill(ijet.Pt(), self.weight)
-    #  self.GetHisto('JetAllEta', ich,ilev,isys).Fill(ijet.Eta(), self.weight)
-    #  self.GetHisto('JetAllCsv', ich,ilev,isys).Fill(ijet.GetCSVv2(), self.weight)
-    #  self.GetHisto('JetAllDCsv', ich,ilev,isys).Fill(ijet.GetDeepCSV(), self.weight)
-
   def FillYieldsHistos(self, ich, ilev, isyst):
     ''' Fill histograms for yields. Also for SS events for the nonprompt estimate '''
     self.SetWeight(isyst)
@@ -509,12 +510,6 @@ class tt5TeV(analysis):
     elif syst == systematic.FSRUp    : self.weight *= self.SFmuon * self.SFelec * self.PUSF * self.TrigSF * self.prefWeight * self.fsrUp
     elif syst == systematic.FSRDo    : self.weight *= self.SFmuon * self.SFelec * self.PUSF * self.TrigSF * self.prefWeight * self.fsrDo
     else                             : self.weight *= self.SFmuon * self.SFelec * self.PUSF * self.TrigSF * self.prefWeight
-    #if   syst == systematic.nom:
-    #   print 'SFmuon = ', self.SFmuon
-    #   print 'SFelec = ', self.SFelec 
-    #   print 'PUSF   = ', self.PUSF 
-    #   print 'TrigSF = ', self.TrigSF 
-    #   print 'prefWe = ', self.prefWeight
 
   def SetVariables(self, isyst):
     leps = self.selLeptons
@@ -624,7 +619,16 @@ class tt5TeV(analysis):
       if dxy > 0.02 or dz > 0.05: continue
       # pT < 12 GeV, |eta| < 2.4
       if p.Pt() < 12 or abs(p.Eta()) > 2.4: continue
-      self.selLeptons.append(lepton(p, charge, 13))
+#      self.selLeptons.append(lepton(p, charge, 13))
+      
+      # Now the tight (analysis) ID (leptonMVA + tighter miniIso)
+      passTightID = True
+      if t.Muon_mvaTTH[i] < 0.55: passTightID = False
+      if (t.Muon_miniPFRelIso_all[i] > 0.325) : passTightID = False
+      if t.Muon_jetIdx[i] >= 0: 
+        if t.Jet_btagDeepB[t.Muon_jetIdx[i]] > 0.1522: passTightID = False
+      self.selLeptons.append(lepton(p, charge, 13, t.Muon_genPartFlav[i] if not(self.isData) else "\0", passTightID))
+      
        
     ##### Electrons
     for i in range(t.nElectron):
@@ -653,7 +657,17 @@ class tt5TeV(analysis):
       if dxy > 0.02 or dz > 0.05: continue
       # pT > 12 GeV, |eta| < 2.4
       if p.Pt() < 12 or abs(p.Eta()) > 2.4: continue
-      self.selLeptons.append(lepton(p, charge, 11))
+#      self.selLeptons.append(lepton(p, charge, 11))
+
+      # Tight (analysis) ID is leptonMVA + tighter miniIso
+      passTightID = True
+      if not(t.Electron_sip3d[i] < 8): passTightID = False
+      if (t.Electron_mvaTTH[i] < 0.125): passTightID = False
+      if (t.Electron_miniPFRelIso_all[i] > 0.085): passTightID = False
+      if t.Electron_jetIdx[i] >= 0:
+        if t.Jet_btagDeepB[t.Electron_jetIdx[i]] > 0.1522: passTightID = False
+      self.selLeptons.append(lepton(p, charge, 11, t.Electron_genPartFlav[i] if not(self.isData) else "\0", passTightID))
+
     leps = self.selLeptons
     pts  = [lep.Pt() for lep in leps]
     self.selLeptons = [lep for _,lep in sorted(zip(pts,leps))]
@@ -847,11 +861,15 @@ class tt5TeV(analysis):
       if not len(leps) >= 2: continue
       l0 = leps[0]; l1 = leps[1]
 
+      TwoTightLeps=l0.passTightID and l1.passTightID
+ 
       ### Dilepton pair
       if l0.Pt() < 20: continue
       if InvMass(l0,l1) < 20: continue
-      self.FillAll(ich, lev.dilepton, isyst, leps, jets, pmet)
-      if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.dilepton)
+      self.FillAll(ich, lev.dilepton_LL, isyst, leps, jets, pmet)
+      if TwoTightLeps: 
+        self.FillAll(ich, lev.dilepton, isyst, leps, jets, pmet)
+        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.dilepton)
 
       # >> Fill the DY histograms
       if (self.isData or self.isDY) and isyst == systematic.nom:
@@ -879,26 +897,42 @@ class tt5TeV(analysis):
 
       ### WW selec
       if (l1.p+l0.p).Pt() > 20 and nJets == 0 and pmet.Pt() > 25:
-        self.FillAll(ich, lev.ww, isyst, leps, jets, pmet)
+        self.FillAll(ich, lev.ww_LL, isyst, leps, jets, pmet)
+        if TwoTightLeps: 
+          self.FillAll(ich, lev.ww, isyst, leps, jets, pmet)
   
       ### Z Veto + MET cut
       if ich == ch.MuMu or ich == ch.ElEl:
         if abs(InvMass(l0,l1) - 91) < 15: continue
-        self.FillAll(ich, lev.ZVeto, isyst, leps, jets, pmet)
-        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.ZVeto)
+        self.FillAll(ich, lev.ZVeto_LL, isyst, leps, jets, pmet)
         if nJets >= 2 and isyst == systematic.nom:
           # Fill MET histos for events with 2 jets 
           self.GetHisto('MET', ich, '2jetsnomet', -1).Fill(pmet.Pt(), self.weight)
+
+        if TwoTightLeps: 
+          self.FillAll(ich, lev.ZVeto, isyst, leps, jets, pmet)
+          if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.ZVeto)
+
         if pmet.Pt() < self.metcut: continue
-        self.FillAll(ich,lev.MET,isyst,leps,jets,pmet)
-        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.MET)
+        self.FillAll(ich,lev.MET_LL,isyst,leps,jets,pmet)
+        if TwoTightLeps:
+          self.FillAll(ich,lev.MET,isyst,leps,jets,pmet)
+          if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.MET)
 
       ### 2 jets
       if nJets < 2: continue
-      self.FillAll(ich, lev.jets2, isyst, leps, jets, pmet)
-      if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.jets2)
+      self.FillAll(ich, lev.jets2_LL, isyst, leps, jets, pmet)
+      if TwoTightLeps:
+        self.FillAll(ich, lev.jets2, isyst, leps, jets, pmet)
+        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.jets2)
 
       ### 1 b-tag, CSVv2 Medium
       if nBtag < 1: continue 
-      self.FillAll(ich, lev.btag1, isyst, leps, jets, pmet)
-      if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.btag1)
+      self.FillAll(ich, lev.btag1_LL, isyst, leps, jets, pmet)
+      if TwoTightLeps:
+        self.FillAll(ich, lev.btag1, isyst, leps, jets, pmet)
+        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.btag1)
+
+      
+
+      
