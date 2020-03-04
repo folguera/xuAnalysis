@@ -10,9 +10,6 @@ average = lambda x: sum(x)/len(x)
 gROOT.SetBatch(1)
 sys.path.append(os.path.abspath(__file__).rsplit('/xuAnalysis/',1)[0]+'/xuAnalysis/')
 
-#from ttbar.ttanalysis import ch, chan, lev, level, dataset, datasets, systematic, systlabel  
-level = {0:'dilepton', 1:'ZVeto', 2:'MET', 3:'2jets', 4:'1btag'}
-
 class TopHistoReader:
  ''' Reads histograms created with the ttanalysis '''
  def SetFileNamePrefix(self, p):
