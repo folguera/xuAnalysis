@@ -134,13 +134,15 @@ class object:
 #################################################################################    
 class lepton(object):
 
-  def __init__(self, pvec = TLorentzVector(), charge = 0, pdgid = -1, mcmatch=-1, passTightID = True):
+  def __init__(self, pvec = TLorentzVector(), charge = 0, pdgid = -1, mcmatch=-1, passTightID = True, passbtag = True):
     self.SetP(pvec)
     self.SetCharge(charge)
     self.SetFlav(pdgid)
     self.resetValues()
     self.mcmatch = mcmatch
     self.passTightID = passTightID
+    self.passbtag = passbtag
+
   ###############################
   ### Set methods
 
