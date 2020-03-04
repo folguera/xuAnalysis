@@ -23,7 +23,6 @@ chan = {ch.ee:'ee', ch.em:'em',ch.mm:'mm'}
 ### Levels to ints
 ### These are the cut levels, i.e. the steps at which we save plots when running
 class lev():
-#  SS2l_LL  = 0 #Has 2 same-sign loose leptons
   SS2l     = 0 #SR 2l SS
   SR2l     = 1 #2lSS + m_ee veto
   SR2l_LT  = 2 #Application region
@@ -258,7 +257,7 @@ class wzanalysis_2lss(analysis):
     self.GetHisto('NJets',ich,ilev,isys).Fill(njet, self.weight)
     self.GetHisto('Btags',ich,ilev,isys).Fill(nbtag, self.weight)
     self.GetHisto('Channel',ich,ilev,isys).Fill(ich, self.weight)
-    self.GetHisto('mtW',ich,ilev,isys).Fill(mtw, self.weight)
+    self.GetHisto('mtw',ich,ilev,isys).Fill(mtw, self.weight)
     
     self.GetHisto('Vtx',  ich,ilev,isys).Fill(self.nvtx, self.weight)
     self.GetHisto("InvMass", ich, ilev, isys).Fill(mll, self.weight)
