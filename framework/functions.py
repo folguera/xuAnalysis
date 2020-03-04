@@ -26,7 +26,7 @@ class object:
   def SetSF(self, SF, error = 0):
     self.SF = SF
     self.SFerr = error
-
+    
   def SetIso(self, iso):
     self.iso = iso
 
@@ -259,6 +259,12 @@ def CheckZpair(lep1, lep2):
   if not abs(lep1.GetPDGid()) == abs(lep2.GetPDGid()): return 0
   if not lep1.charge*lep2.charge < 0: return 0
   return InvMass(lep1,lep2)
+
+def CheckSign(lep1, lep2):
+  ''' Returns: 1 if Same Sign, 0 otherwise '''
+  if not lep1.charge*lep2.charge > 0: return 0
+  return 1
+
 
 def GetNBtags(listOfJets):
   ''' Returns the number of btag jets in the list of jets '''
