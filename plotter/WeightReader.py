@@ -319,11 +319,11 @@ class WeightReader:
    t.bar()
    t.write()
 
- def __init__(self, path = '', outpath = './temp/', chan = 'ElMu', level = '2jets', sampleName = 'TT', PDFname = 'PDFweights', ScaleName = 'ScaleWeights', PSname = 'PSweights', PDFsumName= '', ScaleSumName = '', lumi = 308.54, nGenEvents = -1, pathToTrees='', motherfname='', histoprefix='H'):
+ def __init__(self, path = '', outpath = './temp/', chan = 'ElMu', ilevel = '2jets', sampleName = 'TT', PDFname = 'PDFweights', ScaleName = 'ScaleWeights', PSname = 'PSweights', PDFsumName= '', ScaleSumName = '', lumi = 308.54, nGenEvents = -1, pathToTrees='', motherfname='', histoprefix='H'):
    self.SetPath(path)
    self.SetOutPath(outpath)
    self.SetChan(chan)
-   self.SetLevel(level)
+   self.SetLevel(ilevel)
    self.SetSampleName(sampleName)
    self.SetPDFhistoName(PDFname)
    self.SetScaleHistoName(ScaleName)

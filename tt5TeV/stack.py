@@ -8,8 +8,20 @@ from ROOT import TCanvas, gROOT
 gROOT.SetBatch(1)
 
 hm = HistoManager(processes, systematics, '', path=path, processDic=processDic, lumi = Lumi)
+doParallel = True
+
+if not os.path.exists(outpath):
+  os.mkdir(outpath)
+  print "cp ~folgueras/www/utils/index.php %s/" %outpath
+  os.system("cp ~folgueras/www/utils/index.php %s/" %outpath)
+
+
 
 def Draw(var = 'H_Lep0Pt_ElMu_2jets', ch = '', lev = 'dilepton', rebin = 1, xtit = '', ytit = 'Events', doStackOverflow = False, binlabels = '', setLogY = False, maxscale = 1.6):
+
+  if doParallel: 
+    return "Draw(\'%s\', \'%s\', \'%s\', %i, \'%s\', \'%s\', %s, \'%s\', %s, %i)"%(var, ch, lev, rebin, xtit, ytit, "True" if doStackOverflow else "False", binlabels, "True" if setLogY else "False", maxscale)
+
   s = Stack(outpath=outpath)
   s.SetColors(colors)
   s.SetProcesses(processes)
@@ -39,53 +51,72 @@ def Draw(var = 'H_Lep0Pt_ElMu_2jets', ch = '', lev = 'dilepton', rebin = 1, xtit
   s.SetPlotMaxScale(maxscale)
   s.DrawStack(xtit, ytit)
 
-lev = 'dilepton'
-for chan in ['ElEl', 'MuMu']: 
-  Draw('Jet0Pt', chan, lev, 2, 'Leading jet p_{T} (GeV)', 'Events', False, maxscale = 1.6 )
-  Draw('NJets',  chan, lev, 1, 'Jet multiplicity', 'Events', True)
-  Draw('MET', chan, lev, 2, 'MET (GeV)', 'Events', False, maxscale = 1.6)
-  Draw('MET', chan, 'ZVeto', 2, 'MET (GeV)', 'Events', False, maxscale = 1.6)
-  Draw('MET', chan, '2jetsnomet', 2, 'MET (GeV)', 'Events', False, maxscale = 1.6)
+
+joblist = []
+
+for chan in ['ElEl','MuMu','ElMu']:
+  for lev in ['dilepton_LL', 'dilepton', 'ZVeto', 'MET', '2jets', '1btag', 'ww']:
+    if chan == "ElMu" and ("MET" in lev or  "ZVeto" in lev): continue
+    print "Running ch: %s and lev: %s" %(chan,lev)
+
+    ## Event variables 
+    joblist.append(Draw('InvMass', chan, lev, 1, 'm_{#ell#ell} (GeV)', 'Events', False, maxscale = 2.0 ))
+    joblist.append(Draw('DYMass' , chan, lev, 5, 'm_{#ell#ell} (GeV)', 'Events', False, maxscale = 2.0 ))
+
+    joblist.append(Draw('MET', chan, lev, 2, 'MET (GeV)', 'Events', False, maxscale = 2.0))
+    joblist.append(Draw('HT', chan, lev, 4, 'H_{T} (GeV)', 'Events', False, maxscale = 2.0))
+    joblist.append(Draw('NJets',  chan, lev, 1, 'Jet multiplicity', 'Events', True))
+    joblist.append(Draw('Btags', chan, lev, 1, 'b tag multiplicity', 'Events', True, maxscale = 2.0))
+    joblist.append(Draw('Vtx', chan, lev, 1, 'Number of vertices', 'Events', False, maxscale = 2.0 ))
+
+
+    ## Lepton variables
+    joblist.append(Draw('Lep0Eta', chan, lev, 2, 'Leading lep #eta', 'Events', False, maxscale = 2.0))
+    joblist.append(Draw('Lep0Pt', chan, lev, 2, 'Leading lep p_{T} (GeV)', 'Events', False, maxscale = 2.0))
+    joblist.append(Draw('Lep1Pt', chan, lev, 2, 'Subleading lep p_{T} (GeV)', 'Events', False, maxscale = 2.0))
+    joblist.append(Draw('Lep1Eta', chan, lev, 2, 'Subleading lep #eta', 'Events', False, maxscale = 2.0))
+    joblist.append(Draw('DilepPt', chan, lev, 2, 'Dilepton p_{T} (GeV)', 'Events', False, maxscale = 2.0))
+    joblist.append(Draw('DeltaPhi', chan, lev, 2, '#Delta#phi(ll) (GeV)', 'Events', False, maxscale = 2.0))
     
-for chan in ['ElEl', 'MuMu']: 
-  Draw('MET', chan, 'ZVeto', 1, 'MET (GeV)', 'Events', False, maxscale = 1.9)
+    if chan == "ElMu": 
+      joblist.append(Draw('MuonEta', chan, lev, 2, 'muon #eta', 'Events', False, maxscale = 2.0))
+      joblist.append(Draw('MuonPt', chan, lev, 2, 'muon p_{T} (GeV)', 'Events', False, maxscale = 2.0))
+      joblist.append(Draw('ElecEta', chan, lev, 2, 'electron #eta', 'Events', False, maxscale = 2.0))
+      joblist.append(Draw('ElecPt', chan, lev, 2, 'electron p_{T} (GeV)', 'Events', False, maxscale = 2.0))
+      
+    ## Jet Variables 
+    if not "ww" in lev: 
+      joblist.append(Draw('Jet0Pt', chan, lev, 4, 'Leading jet p_{T} (GeV)', 'Events', False, maxscale = 2.0 ))
+      joblist.append(Draw('Jet1Pt', chan, lev, 5, 'Subeading jet p_{T} (GeV)', 'Events', False, maxscale = 2.0 ))
+      joblist.append(Draw('Jet0Eta', chan, lev, 5, 'Leading jet #eta', 'Events', False, maxscale = 2.0 ))
+      joblist.append(Draw('Jet1Eta', chan, lev, 5, 'Subleading jet #eta', 'Events', False, maxscale = 2.0 ))
+    
 
-lev = 'dilepton'
-ch = 'ElMu'
+if doParallel:
+  from multiprocessing import Pool
+  from contextlib import closing
+  import time
+  doParallel = False
+  def execute(com):
+    eval(com)
 
-Draw('Lep0Eta', 'MuMu', lev, 2, 'Lep #eta', 'Events', False, maxscale = 1.9)
-Draw('Lep0Eta', 'ElEl', lev, 2, 'Lep #eta', 'Events', False, maxscale = 1.9)
-Draw('DYMass', 'MuMu', lev, 10, 'm_{#mu#mu} (GeV)', 'Events', False, maxscale = 1.9)
-Draw('DYMass', 'ElEl', lev, 10, 'm_{ee} ',          'Events', False, maxscale = 1.9)
-for chan in ['ElEl', 'MuMu']: 
-  Draw('MET', chan, 'ZVeto', 2, 'MET (GeV)', 'Events', False, maxscale = 1.6)
-  Draw('MET', chan, '2jetsnomet', 2, 'MET (GeV)', 'Events', False, maxscale = 1.6)
-for chan in ['ElEl', 'MuMu', 'ElMu']:
-  Draw('NJets',  chan, 'dilepton', 1, 'Jet multiplicity', 'Events', True)
-  Draw('Yields', chan, '', 1, 'Level', 'Events', False, maxscale = 1.2)
-  Draw('YieldsSS', chan, '', 1, 'Level', 'Events', False, maxscale = 1.2)
-  for lev in ['dilepton', '2jets']:
-    if lev == '2jets' and chan != 'ElMu': continue
-    Draw('Lep0Eta', chan, lev, 2, 'Lep #eta', 'Events', False, maxscale = 1.6)
-    Draw('Lep0Pt', chan, lev, 2, 'Leading lep p_{T} (GeV)', 'Events', False, maxscale = 1.6)
-    Draw('Lep1Pt', chan, lev, 2, 'Subeading lep p_{T} (GeV)', 'Events', False, maxscale = 1.6)
-    Draw('DilepPt', chan, lev, 2, 'Dilepton p_{T} (GeV)', 'Events', False, maxscale = 1.6)
-    Draw('DeltaPhi', chan, lev, 2, '#Delta#phi(ll) (GeV)', 'Events', False, maxscale = 1.6)
-    Draw('MET', chan, lev, 2, 'MET (GeV)', 'Events', False, maxscale = 1.6)
-    Draw('HT', chan, lev, 4, 'H_{T} (GeV)', 'Events', False, maxscale = 1.6)
+  with closing(Pool(8)) as p:
+    print "Now running " + str(len(joblist)) + " commands using: " + str(4) + " processes. Please wait" 
+    retlist1 = p.map_async(execute, joblist, 1)
+    while not retlist1.ready():
+      print("Plots left: {}".format(retlist1._number_left ))
+      time.sleep(4)
+    retlist1 = retlist1.get()
+    p.close()
+    p.join()
+    p.terminate()
 
-  lev = 'dilepton'
-  Draw('Btags', chan, lev, 1, 'b tag multiplicity', 'Events', True, maxscale = 1.6)
-  Draw('NBtagNJets', chan, lev, 1, 'nJets,nbtags', 'Events', True,['[0,0]', '[1,0]', '[1,1]', '[2,0]', '[2,1]', '[2,2]', '[#geq 3,#geq 0]'],maxscale = 1.6 )
-  Draw('Vtx', chan, lev, 1, 'Number of vertices', 'Events', False, maxscale = 1.6 )
-  for lev in ['dilepton', '2jets']:
-    Draw('InvMass', chan, lev, 20, 'm_{e#mu} (GeV)', 'Events', False, maxscale = 1.6 )
-  for lev in ['2jets']:
-    Draw('Jet0Pt', chan, lev, 4, 'Leading jet p_{T} (GeV)', 'Events', False, maxscale = 1.6 )
-    Draw('Jet1Pt', chan, lev, 5, 'Subeading jet p_{T} (GeV)', 'Events', False, maxscale = 1.6 )
-    Draw('Jet0Eta', chan, lev, 5, 'Leading jet #eta', 'Events', False, maxscale = 1.6 )
-    Draw('Jet1Eta', chan, lev, 5, 'Subleading jet #eta', 'Events', False, maxscale = 1.6 )
+for chan in ['ElMu','ElEl','MuMu']:
+  for lev in ['dilepton_LL', 'dilepton', 'ZVeto', 'MET', '2jets', '1btag', 'ww']:
+    if chan == "ElMu" and ("MET" in lev or  "ZVeto" in lev): continue
+    Draw('NBtagNJets', chan, lev, 1, 'nJets,nbtags', 'Events', True, ['[0,0]', '[1,0]', '[1,1]', '[2,0]', '[2,1]', '[2,2]', '[#geq 3,#geq 0]'],maxscale = 1.6 )
 
+    
 '''
 Draw('InvMass2', 'Muon', lev, 1, 'm(#mu#mu) (GeV)', 'Events', False, maxscale = 1.6)
 Draw('InvMass2', 'Elec', lev, 1, 'm(ee) (GeV)', 'Events', False, maxscale = 1.6)

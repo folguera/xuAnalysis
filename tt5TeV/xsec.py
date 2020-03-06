@@ -9,10 +9,11 @@ from scripts.CrossSection import CrossSection
 process = processDic
 DYsamples   = processDic['DY']
 datasamples = processDic['data']
+
 def xsec(chan = 'ElMu', lev = '2jets', doDD = False):
   x = CrossSection(outpath, chan, lev)
   x.SetTextFormat("tex")
-  x.SetPathToTrees('/pool/ciencias/userstorage/juanr/nanoAODv4/5TeV/5TeV_5sept/')
+  x.SetPathToTrees('/pool/ciencias/nanoAODv4/5TeV/5TeV_5sept/')
   bkg = []
   bkg.append(['tW',            process['tW'],   0.30])
   bkg.append(['Nonprompt lep', process['Nonprompt'], 0.50])
@@ -58,6 +59,6 @@ def xsec(chan = 'ElMu', lev = '2jets', doDD = False):
   x.PrintXsec('CrossSection'+suf)
 
 lev = '2jets'
-xsec('ElMu',lev,1)
-#xsec('MuMu',lev,1)
-#xsec('ElEl',lev,1)
+xsec('ElMu',lev,0)
+xsec('MuMu',lev,0)
+xsec('ElEl',lev,0)

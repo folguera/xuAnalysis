@@ -26,19 +26,20 @@ chan = {ch.ElMu:'ElMu', ch.MuMu:'MuMu', ch.ElEl:'ElEl'}
 ### Levels to ints
 class lev():
   dilepton_LL = 0
-  ZVeto_LL    = 1
-  MET_LL      = 2
-  jets2_LL    = 3
-  btag1_LL    = 4
-  ww_LL       = 5
-  dilepton = 6
-  ZVeto    = 7
-  MET      = 8
-  jets2    = 9
-  btag1    = 10
-  ww       = 11
+##SF  ZVeto_LL    = 1
+##SF  MET_LL      = 2
+##SF  jets2_LL    = 3
+##SF  btag1_LL    = 4
+##SF  ww_LL       = 5
+  dilepton    = 1
+  ZVeto       = 2
+  MET         = 3
+  jets2       = 4
+  btag1       = 5 
+  ww          = 6 
   
-level = {lev.dilepton_LL:'dilepton_LL', lev.ZVeto_LL:'ZVeto_LL', lev.MET_LL:'MET_LL', lev.jets2_LL:'2jets_LL', lev.btag1_LL:'1btag_LL', lev.ww_LL:'ww_LL',lev.dilepton:'dilepton', lev.ZVeto:'ZVeto', lev.MET:'MET', lev.jets2:'2jets', lev.btag1:'1btag', lev.ww:'ww'}
+level = {lev.dilepton_LL:'dilepton_LL', #lev.ZVeto_LL:'ZVeto_LL', lev.MET_LL:'MET_LL', lev.jets2_LL:'2jets_LL', lev.btag1_LL:'1btag_LL', lev.ww_LL:'ww_LL',
+         lev.dilepton:'dilepton', lev.ZVeto:'ZVeto', lev.MET:'MET', lev.jets2:'2jets', lev.btag1:'1btag', lev.ww:'ww'}
 #invlevel = {'dilepton':lev.dilepton, 'ZVeto':lev.ZVeto, 'MET':lev.MET, '2jets':lev.jets2, '1btag':lev.btag1, 'ww':lev.ww}
 
 ### Systematic uncertainties
@@ -272,8 +273,8 @@ class tt5TeV(analysis):
       for key_syst in systlabel.keys():
         if not self.doSyst and key_syst != systematic.nom: continue
         isyst = systlabel[key_syst]
-        self.NewHisto('Yields',   ichan, '', isyst, 5, 0, 5)
-        self.NewHisto('YieldsSS', ichan, '', isyst, 5, 0, 5)
+        self.NewHisto('Yields',   ichan, '', isyst, len(level), 0, len(level))
+        self.NewHisto('YieldsSS', ichan, '', isyst, len(level), 0, len(level))
 
     ### Histos for DY
     if self.isData or self.isDY:
@@ -861,15 +862,17 @@ class tt5TeV(analysis):
       if not len(leps) >= 2: continue
       l0 = leps[0]; l1 = leps[1]
 
-      TwoTightLeps=l0.passTightID and l1.passTightID
+      TwoTightLeps=(l0.passTightID and l1.passTightID)
  
       ### Dilepton pair
       if l0.Pt() < 20: continue
+      if l1.Pt() < 20: continue ## OJO l1.PT() hay que quitarlo!!! 
       if InvMass(l0,l1) < 20: continue
       self.FillAll(ich, lev.dilepton_LL, isyst, leps, jets, pmet)
-      if TwoTightLeps: 
-        self.FillAll(ich, lev.dilepton, isyst, leps, jets, pmet)
-        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.dilepton)
+
+      if not TwoTightLeps: continue 
+      self.FillAll(ich, lev.dilepton, isyst, leps, jets, pmet)
+      if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.dilepton)
 
       # >> Fill the DY histograms
       if (self.isData or self.isDY) and isyst == systematic.nom:
@@ -897,41 +900,31 @@ class tt5TeV(analysis):
 
       ### WW selec
       if (l1.p+l0.p).Pt() > 20 and nJets == 0 and pmet.Pt() > 25:
-        self.FillAll(ich, lev.ww_LL, isyst, leps, jets, pmet)
-        if TwoTightLeps: 
           self.FillAll(ich, lev.ww, isyst, leps, jets, pmet)
   
       ### Z Veto + MET cut
       if ich == ch.MuMu or ich == ch.ElEl:
         if abs(InvMass(l0,l1) - 91) < 15: continue
-        self.FillAll(ich, lev.ZVeto_LL, isyst, leps, jets, pmet)
         if nJets >= 2 and isyst == systematic.nom:
           # Fill MET histos for events with 2 jets 
           self.GetHisto('MET', ich, '2jetsnomet', -1).Fill(pmet.Pt(), self.weight)
 
-        if TwoTightLeps: 
-          self.FillAll(ich, lev.ZVeto, isyst, leps, jets, pmet)
-          if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.ZVeto)
+        self.FillAll(ich, lev.ZVeto, isyst, leps, jets, pmet)
+        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.ZVeto)
 
         if pmet.Pt() < self.metcut: continue
-        self.FillAll(ich,lev.MET_LL,isyst,leps,jets,pmet)
-        if TwoTightLeps:
-          self.FillAll(ich,lev.MET,isyst,leps,jets,pmet)
-          if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.MET)
+        self.FillAll(ich,lev.MET,isyst,leps,jets,pmet)
+        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.MET)
 
       ### 2 jets
       if nJets < 2: continue
-      self.FillAll(ich, lev.jets2_LL, isyst, leps, jets, pmet)
-      if TwoTightLeps:
-        self.FillAll(ich, lev.jets2, isyst, leps, jets, pmet)
-        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.jets2)
+      self.FillAll(ich, lev.jets2, isyst, leps, jets, pmet)
+      if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.jets2)
 
       ### 1 b-tag, CSVv2 Medium
       if nBtag < 1: continue 
-      self.FillAll(ich, lev.btag1_LL, isyst, leps, jets, pmet)
-      if TwoTightLeps:
-        self.FillAll(ich, lev.btag1, isyst, leps, jets, pmet)
-        if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.btag1)
+      self.FillAll(ich, lev.btag1, isyst, leps, jets, pmet)
+      if self.isTTnom and isyst == systematic.nom: self.FillLHEweights(t, ich, lev.btag1)
 
       
 

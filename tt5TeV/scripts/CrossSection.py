@@ -4,7 +4,8 @@ from framework.fileReader import GetFiles
 from ROOT.TMath import Sqrt as sqrt
 from plotter.OutText import OutText
 
-from tt5TeV import lev, level, invlevel
+from tt5TeV import lev, level
+invlevel = dict( [ (val, key) for key, val in level.iteritems() ])
 
 class CrossSection:
   
@@ -359,22 +360,35 @@ class CrossSection:
     files = GetFiles(self.pathToTrees, self.motherfname)
     for f in files: self.treesow.Add(f)
 
-  def ReadHistos(self, path, chan = 'ElMu', level = '2jets', lumi = 308.54, lumiunc = 0.04, bkg = [], signal = [], data = '', expUnc = [], modUnc = [], histoPrefix = ''):
+  def GetBinNumberForLevel(self, ilev = ''):
+    ''' Returns the bin number for a given level for the yields histogram '''
+    if ilev == '': ilev = self.level
+    if isinstance(ilev,int): return ilev
+    for lv in level.keys(): 
+      if ilev == level[lv]: 
+        print "binnumber is " + str(lv+1)
+        return lv+1
+    return -1
+
+
+  def ReadHistos(self, path, chan = 'ElMu', ilevel = '2jets', lumi = 308.54, lumiunc = 0.04, bkg = [], signal = [], data = '', expUnc = [], modUnc = [], histoPrefix = ''):
     ''' Set the xsec from histos '''
     if isinstance(expUnc, str): expUnc = expUnc.replace(' ', '').split(',')
     if isinstance(modUnc, str): modUnc = modUnc.replace(' ', '').split(',')
-    self.SetChan(chan); self.SetLevel(level)
+    self.SetChan(chan); self.SetLevel(ilevel)
     self.t = TopHistoReader(path)
     self.t.SetHistoNamePrefix(histoPrefix)
     self.t.SetLumi(lumi)
-    self.t.SetChan(chan); self.t.SetLevel(level)
+    self.t.SetChan(chan)
+    self.t.SetLevel(ilevel)
+    self.t.SetBinNumberForLevel(self.GetBinNumberForLevel(ilevel))
     self.ss = SampleSums(self.pathToTrees, self.motherfname, 'Runs')
     signalName = signal[0]
     signalSample = signal[1]
 
     # GetFiduEvents
     hfiduname = 'FiduEvents'#_%s'%chan
-    fiduEvents = self.t.GetNamedHisto(hfiduname,signalSample).GetBinContent(invlevel[level])
+    fiduEvents = self.t.GetNamedHisto(hfiduname,signalSample).GetBinContent(invlevel[ilevel]) 
     nGenEvents = self.ss.GetCount('Count') #self.GetNGenEvents(signalSample)
     self.SetLumiUnc(lumiunc)
     self.SetFiduEvents(fiduEvents)
@@ -385,22 +399,22 @@ class CrossSection:
         expunc = expUnc
       elif len(l) == 4:
         name, pr, unc, expunc = l
-      self.AddBkg(name, self.t.GetYield(pr), unc, self.t.GetUnc(pr, chan, level, expUnc), self.t.GetYieldStatUnc(pr))
+      self.AddBkg(name, self.t.GetYield(pr), unc, self.t.GetUnc(pr, chan, ilevel, expUnc), self.t.GetYieldStatUnc(pr))
     self.SetSignal(signalName, self.t.GetYield(signalSample), self.t.GetYieldStatUnc(signalSample))
     self.t.SetIsData(True)
     self.SetData(self.t.GetYield(data))
     self.t.SetIsData(False)
-    for e in expUnc: self.AddExpUnc(e, self.t.GetUnc(signal[1], chan, level, e))
+    for e in expUnc: self.AddExpUnc(e, self.t.GetUnc(signal[1], chan, ilevel, e))
     # Modeling uncertainties
     if 'pdf' in modUnc or 'PDF' in modUnc or 'Scale' in modUnc or 'ME' in modUnc or 'scale' in modUnc:
       pathToTrees = self.pathToTrees #'/pool/ciencias/userstorage/juanr/nanoAODv4/5TeV/5TeV_5sept/'
       motherfname = self.motherfname #'TT_TuneCP5_PSweights_5p02TeV'
-      w = WeightReader(path, '',chan, level, sampleName='TT', pathToTrees=pathToTrees, motherfname=motherfname, PDFname='PDFweights', ScaleName='ScaleWeights', lumi=296.1, histoprefix=histoPrefix)
+      w = WeightReader(path, '',chan, ilevel, sampleName='TT', pathToTrees=pathToTrees, motherfname=motherfname, PDFname='PDFweights', ScaleName='ScaleWeights', lumi=296.1, histoprefix=histoPrefix)
       #w.SetSampleName(signalName)
       if 'pdf' in modUnc or 'PDF' in modUnc: self.AddModUnc('PDF + alpha_S',w.GetPDFandAlphaSunc())
       if 'scale' in modUnc or 'ME' in modUnc: self.AddModUnc('Scale ME',w.GetMaxRelUncScale())
-    if 'ISR' in modUnc or 'isr' in modUnc: self.AddModUnc('ISR', self.t.GetUnc(signalSample, chan, level, 'ISR'))
-    if 'FSR' in modUnc or 'fsr' in modUnc: self.AddModUnc('FSR', self.t.GetUnc(signalSample, chan, level, 'FSR'))
+    if 'ISR' in modUnc or 'isr' in modUnc: self.AddModUnc('ISR', self.t.GetUnc(signalSample, chan, ilevel, 'ISR'))
+    if 'FSR' in modUnc or 'fsr' in modUnc: self.AddModUnc('FSR', self.t.GetUnc(signalSample, chan, ilevel, 'FSR'))
 
 
   def __init__(self, outpath = './temp/', lev = '', chan = '', genEvents = 1, fiduEvents = 1, textformat = "txt"):
@@ -420,7 +434,7 @@ class CrossSection:
     self.SetOutPath(outpath)
     self.doFiducial = True
     self.SetMotherName("TT_TuneCP5_5p02TeV")
-    self.SetPathToTrees("")
+    self.SetPathToTrees("/"+""+"/")
 
 ######################################################################################
 ### Auxiliar functions

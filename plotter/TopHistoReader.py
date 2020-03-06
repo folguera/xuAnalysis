@@ -10,6 +10,7 @@ average = lambda x: sum(x)/len(x)
 gROOT.SetBatch(1)
 sys.path.append(os.path.abspath(__file__).rsplit('/xuAnalysis/',1)[0]+'/xuAnalysis/')
 
+
 class TopHistoReader:
  ''' Reads histograms created with the ttanalysis '''
  def SetFileNamePrefix(self, p):
@@ -45,6 +46,9 @@ class TopHistoReader:
   
  def SetLevel(self, ilevel):
    self.level = ilevel
+
+ def SetBinNumberForLevel(self, b):
+   self.binN = b
 
  def SetSystematic(self, syst):
    self.syst = syst
@@ -164,13 +168,13 @@ class TopHistoReader:
    if self.doNormalize: h.Scale(1./(integral if integral != 0 else 1))
    return h
 
- def GetBinNumberForLevel(self, ilev = ''):
-   ''' Returns the bin number for a given level for the yields histogram '''
-   if ilev == '': ilev = self.level
-   if isinstance(ilev,int): return ilev
-   for lv in level.keys(): 
-     if ilev == level[lv]: return lv+1
-   return -1
+## def GetBinNumberForLevel(self, ilev = ''):
+##   ''' Returns the bin number for a given level for the yields histogram '''
+##   if ilev == '': ilev = self.level
+##   if isinstance(ilev,int): return ilev
+##   for lv in level.keys(): 
+##     if ilev == level[lv]: return lv+1
+##   return -1
 
  def GetYieldHisto(self, pr = '', ch = '', syst = '', SS = False):
    ''' Returns the histogram with yields '''
@@ -188,7 +192,7 @@ class TopHistoReader:
    if ilev != '': self.SetLevel(ilev)
    self.SetSystematic(s)
    hyields = self.GetYieldHisto(pr, ch, s, SS)
-   y = hyields.GetBinContent(self.GetBinNumberForLevel(self.level))
+   y = hyields.GetBinContent(self.binN)
    return y
 
  def GetRunXsec(self, pr = ''):
@@ -233,7 +237,7 @@ class TopHistoReader:
    if ilev != '': self.SetLevel(ilev)
    if s  != '':   self.SetSystematic(s)
    hyields = self.GetYieldHisto(pr, ch, s, SS)
-   y = hyields.GetBinError(self.GetBinNumberForLevel(self.level))
+   y = hyields.GetBinError(self.binN)
    if not y == y: y = 0
    return y
 
@@ -316,7 +320,7 @@ class TopHistoReader:
        self.AddToHistoDic(h, pr, hsystname)
    return self.histodic
 
- def __init__(self, path = './', process = '', var = '', chan = '', ilevel = '', syst = '', fileprefix = '', histoprefix = ''):
+ def __init__(self, path = './', process = '', var = '', chan = '', ilevel = '', syst = '', fileprefix = '', histoprefix = '', binN = 0):
     self.doStackOverflow = False
     self.doNormalize = False
     self.IsData  = False
@@ -336,6 +340,7 @@ class TopHistoReader:
     self.SetLevel(ilevel)
     self.SetSystematic(syst)
     self.SetYieldsSSname()
+    self.SetBinNumberForLevel(binN)
 
 
 ###############################################################################################
